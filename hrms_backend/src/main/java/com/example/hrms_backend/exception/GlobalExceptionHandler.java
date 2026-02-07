@@ -47,17 +47,6 @@ public class GlobalExceptionHandler {
         return response;
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, Object> handleIOException(IOException ex)
-    {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", 403);
-        response.put("error", "IO Exception");
-        response.put("message", ex.getMessage());
-        return response;
-    }
-
     @ExceptionHandler(Exception.class)
     public String handleall(Exception e){
         String message = e.getMessage();
