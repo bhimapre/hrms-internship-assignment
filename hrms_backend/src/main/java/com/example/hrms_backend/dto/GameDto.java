@@ -13,7 +13,5 @@ public class GameDto {
     private UUID gameId;
     private String gameName;
     private boolean active;
-
-    @ManyToMany(mappedBy = "gamePreferences")
     private Set<UUID> interestedEmployeesIds;
 }

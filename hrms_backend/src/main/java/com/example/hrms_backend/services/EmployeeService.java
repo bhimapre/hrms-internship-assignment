@@ -2,7 +2,9 @@ package com.example.hrms_backend.services;
 
 import com.example.hrms_backend.dto.EmployeeDto;
 import com.example.hrms_backend.dto.EmployeeProfileUpdate;
+import com.example.hrms_backend.entities.Department;
 import com.example.hrms_backend.entities.Employee;
+import com.example.hrms_backend.entities.Game;
 import com.example.hrms_backend.exception.ResourceNotFoundException;
 import com.example.hrms_backend.repositories.DepartmentRepo;
 import com.example.hrms_backend.repositories.EmployeeRepo;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.lang.module.ResolutionException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -49,15 +52,19 @@ public class EmployeeService {
     public EmployeeDto createEmployee(EmployeeDto employeeDto){
         Employee employee = modelMapper.map(employeeDto, Employee.class);
         employee.setName(employeeDto.getName());
+        employee.setEmail(employeeDto.getEmail());
+        employee.setCity(employeeDto.getCity());
         employee.setDob(employeeDto.getDob());
         employee.setPhoneNumber(employeeDto.getPhoneNumber());
         employee.setAddress(employeeDto.getAddress());
         employee.setJoiningDate(employeeDto.getJoiningDate());
         employee.setDesignation(employeeDto.getDesignation());
-        employee.setDepartment(departmentRepo.findById(employeeDto.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Department not found")));
+        Department department = departmentRepo.findById(employeeDto.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+        employee.setDepartment(department);
         if(employeeDto.getManagerId() != null)
         {
-            employeeRepo.findById(employeeDto.getManagerId()).orElseThrow(() -> new ResourceNotFoundException("Manager not found"));
+            Employee emp = employeeRepo.findById(employeeDto.getManagerId()).orElseThrow(() -> new ResourceNotFoundException("Manager not found"));
+            employee.setManager(emp);
         }
         employee.setUser(userRepo.findById(employeeDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found")));
 
@@ -69,18 +76,49 @@ public class EmployeeService {
     public EmployeeDto updateEmployee(UUID employeeId, EmployeeDto employeeDto){
         Employee employee = employeeRepo.findById(employeeId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
 
-        employee.setName(employeeDto.getName());
-        employee.setDob(employeeDto.getDob());
-        employee.setPhoneNumber(employeeDto.getPhoneNumber());
-        employee.setAddress(employeeDto.getAddress());
-        employee.setJoiningDate(employeeDto.getJoiningDate());
-        employee.setDesignation(employeeDto.getDesignation());
-        employee.setDepartment(departmentRepo.findById(employeeDto.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Department not found")));
+        if(employeeDto.getName() != null){
+            employee.setName(employeeDto.getName());
+        }
+
+        if(employeeDto.getEmail() != null){
+            employee.setEmail(employeeDto.getEmail());
+        }
+
+        if(employeeDto.getCity() != null){
+            employee.setCity(employeeDto.getCity());
+        }
+
+        if(employeeDto.getDob() != null){
+            employee.setDob(employeeDto.getDob());
+        }
+
+        if(employeeDto.getPhoneNumber() != null){
+            employee.setPhoneNumber(employeeDto.getPhoneNumber());
+        }
+
+        if(employeeDto.getAddress() != null){
+            employee.setAddress(employeeDto.getAddress());
+        }
+
+        if(employeeDto.getJoiningDate() != null){
+            employee.setJoiningDate(employeeDto.getJoiningDate());
+        }
+
+        if(employeeDto.getDesignation() != null){
+            employee.setDesignation(employeeDto.getDesignation());
+        }
+
+        if(employeeDto.getDepartmentId() != null){
+            Department department = departmentRepo.findById(employeeDto.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+            employee.setDepartment(department);
+        }
+
         if(employeeDto.getManagerId() != null)
         {
-            employeeRepo.findById(employeeDto.getManagerId()).orElseThrow(() -> new ResourceNotFoundException("Manager not found"));
+           Employee emp = employeeRepo.findById(employeeDto.getManagerId()).orElseThrow(() -> new ResourceNotFoundException("Manager not found"));
+           employee.setManager(emp);
         }
-        employee.setUser(userRepo.findById(employeeDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found")));
+
         Employee updateEmployee = employeeRepo.save(employee);
         return modelMapper.map(updateEmployee, EmployeeDto.class);
     }
@@ -99,12 +137,18 @@ public class EmployeeService {
         }
 
         if(profileDto.getGamePreferences() != null){
-            employee.setGamePreferences(
-                    new HashSet<>(gameRepo.findAllById(profileDto.getGamePreferences()))
-            );
+
+            Set<UUID> gameIds = profileDto.getGamePreferences();
+            List<Game> games = gameRepo.findAllById(gameIds);
+
+            if(games.size() != gameIds.size())
+            {
+                throw new IllegalArgumentException("Games not found");
+            }
+
+            employee.setGamePreferences(new HashSet<>(games));
         }
 
         employeeRepo.save(employee);
     }
-
 }

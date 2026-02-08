@@ -29,7 +29,7 @@ public class EmployeeController {
 
     // Get employee by id accessible by all
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("api/common/employee/{employeeId}")
+    @GetMapping("/api/common/employee/{employeeId}")
     public ResponseEntity<EmployeeDto> getEmployeeById(@PathVariable UUID employeeId){
         EmployeeDto employeeDto = employeeService.getEmployeeById(employeeId);
         return ResponseEntity.ok(employeeDto);
@@ -48,13 +48,13 @@ public class EmployeeController {
     @PutMapping("/api/hr/update-employee/{employeeId}")
     public ResponseEntity<EmployeeDto> updateEmployee(@Valid @PathVariable UUID employeeId, @RequestBody EmployeeDto employeeDto){
         EmployeeDto updateEmployee =employeeService.updateEmployee(employeeId, employeeDto);
-        return ResponseEntity.ok(updateEmployee);
+        return new ResponseEntity<>(updateEmployee, HttpStatus.OK);
     }
 
     // Update game preference by login user
-    @PatchMapping("api/common/employee/{employeeId}")
+    @PatchMapping("/api/common/employee/{employeeId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> employeeProfileUpdate(@PathVariable UUID employeeId, @RequestBody EmployeeProfileUpdate profileUpdateDto){
+    public ResponseEntity<Void> employeeProfileUpdate(@PathVariable UUID employeeId, @Valid @RequestBody EmployeeProfileUpdate profileUpdateDto){
         employeeService.updateSelfProfile(employeeId, profileUpdateDto);
         return ResponseEntity.noContent().build();
     }

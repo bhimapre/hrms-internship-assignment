@@ -1,9 +1,5 @@
 package com.example.hrms_backend.dto;
 
-import com.example.hrms_backend.entities.Game;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
