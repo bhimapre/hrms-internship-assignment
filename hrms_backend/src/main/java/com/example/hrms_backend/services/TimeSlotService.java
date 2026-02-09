@@ -28,7 +28,6 @@ public class TimeSlotService {
 
     @Transactional
     public void generateSlots(UUID gameId, LocalDate fromDate, LocalDate toDate, UUID createdBy){
-        System.out.println("working system");
         GameTimeSlotConfig config = configRepo.findByGame_GameIdAndActiveTrue(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Time slot is not available"));
 

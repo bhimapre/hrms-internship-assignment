@@ -1,0 +1,41 @@
+package com.example.hrms_backend.controllers;
+
+import com.example.hrms_backend.dto.TravelDocumentDto;
+import com.example.hrms_backend.services.TravelDocumentService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/travel-documents")
+public class TravelDocumentController {
+
+    private final TravelDocumentService travelDocumentService;
+
+    // Add documents
+    @PostMapping("/{travelId}")
+    public ResponseEntity<String> uploadTravelDocument(@PathVariable UUID travelId, @RequestPart("file")MultipartFile file, @Valid @RequestPart("data")TravelDocumentDto documentDto) throws IOException{
+        String fileName = travelDocumentService.uploadTravelDocuments(travelId, file, documentDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(fileName);
+    }
+
+    // Get all documents
+    @GetMapping
+    public ResponseEntity<List<TravelDocumentDto>> getallDocuments(){
+        return ResponseEntity.ok(travelDocumentService.getAllTravelDocuments());
+    }
+
+    // Get document by id
+    @GetMapping("/{documentId}")
+    public ResponseEntity<TravelDocumentDto> getDocumentById(@PathVariable UUID documentId){
+        return ResponseEntity.ok(travelDocumentService.getTravelDocumentsById(documentId));
+    }
+}
