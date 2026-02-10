@@ -21,4 +21,16 @@ public class SecurityUtils {
 
         return user.getUserId();
     }
+
+    public static String getRole(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null || !(authentication.getPrincipal() instanceof CustomUserDetails)){
+            throw new IllegalStateException("User is not authenticated");
+        }
+
+        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+
+        return user.getRole();
+    }
 }

@@ -1,10 +1,7 @@
 package com.example.hrms_backend.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -50,6 +47,7 @@ public class Employee {
     private String city;
 
     @Column(name = "phone_Number", nullable = false)
+    @Pattern(regexp = "^[6-9]\\\\d{9}$", message = "Invalid phone number format")
     @NotBlank(message = "Phone Number is required")
     @Size(min = 10, max =  10, message = "Phone Number size must be 10 digits")
     private String phoneNumber;
