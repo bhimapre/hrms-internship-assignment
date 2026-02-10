@@ -1,5 +1,6 @@
 package com.example.hrms_backend.controllers;
 
+import com.example.hrms_backend.dto.CreateTravelRequestDto;
 import com.example.hrms_backend.dto.TravelDto;
 import com.example.hrms_backend.services.TravelService;
 import jakarta.validation.Valid;
@@ -21,8 +22,8 @@ public class TravelController {
     // Travel and assigned employee
     @PreAuthorize("hasRole('HR')")
     @PostMapping("/api/hr/travels")
-    public ResponseEntity<TravelDto> createTravel(@Valid @RequestBody TravelDto travelDto, @RequestParam List<UUID> employeeIds){
-        TravelDto travel = travelService.createTravelEmployee(travelDto, employeeIds);
+    public ResponseEntity<TravelDto> createTravel(@Valid @RequestBody CreateTravelRequestDto travelDto){
+        TravelDto travel = travelService.createTravelEmployee(travelDto);
         return new ResponseEntity<>(travel, HttpStatus.CREATED);
     }
 

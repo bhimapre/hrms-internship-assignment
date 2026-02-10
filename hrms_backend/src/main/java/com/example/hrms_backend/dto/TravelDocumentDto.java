@@ -18,8 +18,8 @@ public class TravelDocumentDto {
     @NotBlank(message = "Owner Type is required")
     private String ownerType;
 
-    @NotBlank(message = "Document Path is required")
-    private String documentPath;
+    @NotBlank(message = "file url is required")
+    private String travelDocumentFileUrl;
 
     private UUID travelId;
     private UUID employeeID;

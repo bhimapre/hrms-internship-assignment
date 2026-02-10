@@ -2,6 +2,7 @@ package com.example.hrms_backend.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,9 +22,13 @@ public class TravelExpenseProof {
     @Column(name = "expense_proof_id")
     private UUID expenseProofId;
 
-    @Column(name = "expense_proof_path",nullable = false)
-    @NotBlank(message = "Expense Proof Path is required")
-    private String expenseProofPath;
+    @Column(name = "expense_file_url", nullable = false)
+    @NotNull(message = "file url is required")
+    private String expenseFileUrl;
+
+    @Column(name =  "public_id", nullable = false)
+    @NotNull(message = "public id is required")
+    private String publicId;
 
     @Column(name = "uploaded_by", nullable = false)
     @NotBlank(message = "Uploaded by is required")

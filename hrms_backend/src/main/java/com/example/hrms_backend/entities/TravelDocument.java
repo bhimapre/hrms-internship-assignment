@@ -33,9 +33,13 @@ public class TravelDocument {
     @NotBlank(message = "Owner Type is required")
     private String ownerType;
 
-    @Column(name = "document_path", nullable = false)
-    @NotBlank(message = "Document Path is required")
-    private String documentPath;
+    @Column(name = "travel_document_file_url", nullable = false)
+    @NotNull(message = "file url is required")
+    private String travelDocumentFileUrl;
+
+    @Column(name =  "public_id", nullable = false)
+    @NotNull(message = "public id is required")
+    private String publicId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "travel_id")

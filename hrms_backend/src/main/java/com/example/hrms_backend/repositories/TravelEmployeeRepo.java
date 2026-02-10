@@ -19,4 +19,6 @@ public interface TravelEmployeeRepo extends JpaRepository<TravelEmployee, UUID> 
     List<TravelEmployee> findByEmployee_EmployeeIdIn(Set<UUID> employeeIds);
 
     List<TravelEmployee> findAllByEmployee_Employee(UUID employeeId);
+
+    List<UUID> findTravelIdsByEmployeeIds(List<UUID> employeeIds);
 }

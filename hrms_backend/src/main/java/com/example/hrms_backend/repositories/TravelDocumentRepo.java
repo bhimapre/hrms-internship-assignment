@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface TravelDocumentRepo extends JpaRepository<TravelDocument, UUID> {
 
     List<TravelDocument> findByUploadedBy(UUID uploadedBy);
+
+    List<TravelDocument> findByTravel_TravelIdIn(List<UUID> travelIds);
 }

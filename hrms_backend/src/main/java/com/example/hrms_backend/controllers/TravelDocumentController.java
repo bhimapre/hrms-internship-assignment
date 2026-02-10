@@ -29,7 +29,7 @@ public class TravelDocumentController {
 
     // Get all documents
     @GetMapping
-    public ResponseEntity<List<TravelDocumentDto>> getallDocuments(){
+    public ResponseEntity<List<TravelDocumentDto>> getAllDocuments(){
         return ResponseEntity.ok(travelDocumentService.getAllTravelDocuments());
     }
 
@@ -37,5 +37,17 @@ public class TravelDocumentController {
     @GetMapping("/{documentId}")
     public ResponseEntity<TravelDocumentDto> getDocumentById(@PathVariable UUID documentId){
         return ResponseEntity.ok(travelDocumentService.getTravelDocumentsById(documentId));
+    }
+
+    @PutMapping("/{documentId}")
+    public ResponseEntity<TravelDocumentDto> updateDocument(@PathVariable UUID documentId, @RequestBody TravelDocumentDto documentDto){
+        TravelDocumentDto updated = travelDocumentService.updateTravelDocumentDetails(documentId, documentDto);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PutMapping("/file/{documentId}")
+    public ResponseEntity<TravelDocumentDto> updateDocumentFile(@PathVariable UUID documentId, @RequestPart MultipartFile file) throws IOException{
+        TravelDocumentDto updated = travelDocumentService.updateTravelDocumentFile(documentId, file);
+        return ResponseEntity.ok(updated);
     }
 }
