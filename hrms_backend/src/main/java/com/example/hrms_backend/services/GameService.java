@@ -1,7 +1,10 @@
 package com.example.hrms_backend.services;
 
 import com.example.hrms_backend.dto.GameDto;
+import com.example.hrms_backend.entities.Employee;
 import com.example.hrms_backend.entities.Game;
+import com.example.hrms_backend.exception.ResourceNotFoundException;
+import com.example.hrms_backend.repositories.EmployeeRepo;
 import com.example.hrms_backend.repositories.GameRepo;
 import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ public class GameService {
     private final GameRepo gameRepo;
     private final ModelMapper modelMapper;
     private static final String GAME_NOT_FOUND = "Game not found";
+    private final EmployeeRepo employeeRepo;
 
     // Get All Games
     public List<GameDto> getAllGames(){
@@ -37,9 +41,12 @@ public class GameService {
 
     // Add Gamme
     public GameDto createGame(GameDto gameDto){
+        UUID userId = SecurityUtils.getCurrentUserId();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        UUID employeeId = employee.getEmployeeId();
         Game game = modelMapper.map(gameDto, Game.class);
         game.setCreatedAt(LocalDateTime.now());
-        game.setCreatedBy(SecurityUtils.getCurrentUserId());
+        game.setCreatedBy(employeeId);
 
         game = gameRepo.save(game);
         return modelMapper.map(game, GameDto.class);

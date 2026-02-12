@@ -18,7 +18,7 @@ public class GameTimeSlotConfigController {
     private final GameTimeSlotConfigService gameTimeSlotConfigService;
 
     // create time slot config
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PostMapping("/api/hr/add-game-time-slot-config")
     public ResponseEntity<GameTimeSlotConfigDto> createTimeSlotConfig(@Valid @RequestBody GameTimeSlotConfigDto dto){
 
@@ -27,7 +27,7 @@ public class GameTimeSlotConfigController {
     }
 
     // Update time slot config
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PutMapping("/api/hr/game-time-slot-config/{gameId}")
     public ResponseEntity<GameTimeSlotConfigDto> updateTimeSlotConfig(@PathVariable UUID gameId, @Valid @RequestBody GameTimeSlotConfigDto dto){
 

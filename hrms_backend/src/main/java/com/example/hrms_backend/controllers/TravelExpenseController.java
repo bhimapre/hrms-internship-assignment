@@ -30,7 +30,7 @@ public class TravelExpenseController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PutMapping("api/hr/expense/approve/{expenseId}")
     public ResponseEntity<Void> approveExpense(@PathVariable UUID expenseId, @RequestParam String remark){
         travelExpenseService.approveExpense(expenseId, remark);

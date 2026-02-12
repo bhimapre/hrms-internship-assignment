@@ -15,6 +15,4 @@ public class GameWaitingQueueDto {
     private UUID timeSlotId;
     private UUID gameId;
     private UUID employeeId;
-    private QueueStatus status;
-    private LocalDateTime createdAt;
 }

@@ -35,8 +35,6 @@ public class TravelExpenseService {
     private final TravelEmployeeRepo travelEmployeeRepo;
     private final ModelMapper modelMapper;
 
-
-
     // Add Expense
     public TravelExpenseDto addExpense(TravelExpenseDto travelExpenseDto){
 
@@ -84,7 +82,7 @@ public class TravelExpenseService {
 
         TravelExpense expense = travelExpenseRepo.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
-        if(employeeId != expense.getEmployee().getEmployeeId()){
+        if(!employeeId.equals(expense.getEmployee().getEmployeeId())){
             throw new BadRequestException("Employee not found");
         }
 
@@ -118,7 +116,7 @@ public class TravelExpenseService {
 
         String role = SecurityUtils.getRole();
         if(!role.equals("HR")){
-            throw new AccessDeniedException("You have access of it");
+            throw new AccessDeniedException("You have no access of it");
         }
 
         expense.setExpenseStatus(ExpenseStatus.APPROVED);
@@ -129,7 +127,7 @@ public class TravelExpenseService {
         expense.setUpdatedBy(employeeId);
     }
 
-    // Approve by HR
+    // Reject by HR
     public void rejectExpense(UUID expenseId, String remark){
 
         UUID userId = SecurityUtils.getCurrentUserId();
@@ -190,7 +188,6 @@ public class TravelExpenseService {
                 .toList();
     }
 
-
     // Get travel expense By ID
     public TravelExpenseDto getTravelExpenseById(UUID expenseId) {
 
@@ -229,6 +226,26 @@ public class TravelExpenseService {
         return modelMapper.map(expense, TravelExpenseDto.class);
     }
 
+    // Update travel expense details
+    public TravelExpenseDto updateTravelExpenseDetails(UUID expenseId, TravelExpenseDto expenseDto){
+        UUID userId = SecurityUtils.getCurrentUserId();
+        String role = SecurityUtils.getRole();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        UUID employeeId = employee.getEmployeeId();
+
+        TravelExpense expense = modelMapper.map(expenseDto, TravelExpense.class);
+        if(!role.equals("HR")){
+            if(!expense.getCreatedBy().equals(employeeId)){
+                throw new AccessDeniedException("You have no access of it");
+            }
+        }
+        expense.setUpdatedBy(employeeId);
+        expense.setUpdatedAt(LocalDateTime.now());
+        travelExpenseRepo.save(expense);
+
+        return modelMapper.map(expense, TravelExpenseDto.class);
+    }
+
     // Cancel Expense
     public void cancelExpense(UUID expenseId){
 
@@ -242,12 +259,14 @@ public class TravelExpenseService {
             throw new AccessDeniedException("You have not access to cancel expense");
         }
 
-        if(expense.getExpenseStatus().equals(ExpenseStatus.SUBMITTED) || expense.getExpenseStatus().equals(ExpenseStatus.REJECTED)){
+        if(expense.getExpenseStatus().equals(ExpenseStatus.APPROVED) || expense.getExpenseStatus().equals(ExpenseStatus.REJECTED)){
             throw new AccessDeniedException("You cannot change approved and rejected expense");
         }
 
         expense.setExpenseStatus(ExpenseStatus.CANCELLED);
         expense.setUpdatedAt(LocalDateTime.now());
         expense.setUpdatedBy(employeeId);
+
+        travelExpenseRepo.save(expense);
     }
 }

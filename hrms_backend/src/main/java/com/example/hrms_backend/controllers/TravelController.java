@@ -20,7 +20,7 @@ public class TravelController {
     private final TravelService travelService;
 
     // Travel and assigned employee
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PostMapping("/api/hr/travels")
     public ResponseEntity<TravelDto> createTravel(@Valid @RequestBody CreateTravelRequestDto travelDto){
         TravelDto travel = travelService.createTravelEmployee(travelDto);
@@ -28,6 +28,7 @@ public class TravelController {
     }
 
     // Get all travels
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/travels")
     public ResponseEntity<List<TravelDto>> getAllTravels(){
         List<TravelDto> travel = travelService.getAllTravel();
@@ -35,11 +36,13 @@ public class TravelController {
     }
 
     // Get travel by id
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/travels/{travelId}")
     public ResponseEntity<TravelDto> getTravelById(@PathVariable UUID travelId){
         return ResponseEntity.ok(travelService.getTravelById(travelId));
     }
 
+    @PreAuthorize("hasAuthority('HR')")
     @PutMapping("/api/travels/{travelId}")
     public ResponseEntity<TravelDto> updateTravel(@PathVariable UUID travelId, @Valid @RequestBody TravelDto travelDto){
         return ResponseEntity.ok(travelService.updateTravel(travelId, travelDto));

@@ -38,6 +38,7 @@ public class TravelDocumentService {
     private final EmployeeRepo employeeRepo;
     private final TravelEmployeeRepo travelEmployeeRepo;
     private final Cloudinary cloudinary;
+    private static final String EMPLOYEE_NOT_FOUND = "Employee not found";
 
     // Upload travel documents
     public String uploadTravelDocuments(UUID travelId, MultipartFile file, TravelDocumentDto documentDto) throws IOException {
@@ -45,7 +46,7 @@ public class TravelDocumentService {
         String contentType = file.getContentType();
         String role = SecurityUtils.getRole();
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         Travel travel = travelRepo.findById(travelId).orElseThrow(() -> new ResourceNotFoundException("Travel not found"));
@@ -92,7 +93,7 @@ public class TravelDocumentService {
 
         String role = SecurityUtils.getRole();
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         List<TravelDocument> documents;
@@ -127,7 +128,7 @@ public class TravelDocumentService {
         TravelDocument document = documentRepo.findById(travelDocumentId).orElseThrow(() -> new ResolutionException("Travel not found"));
         String role = SecurityUtils.getRole();
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
         UUID travelId = document.getTravel().getTravelId();
 
@@ -138,27 +139,29 @@ public class TravelDocumentService {
         boolean assigned = travelEmployeeRepo.existsByTravel_TravelIdAndEmployee_EmployeeId(travelId, employeeId);
 
         if(!assigned){
-            List<Employee> team = employeeRepo.findByManager_EmployeeId(employeeId);
 
-            boolean teamAssigned = team.stream()
-                    .anyMatch(e -> travelEmployeeRepo
-                            .existsByTravel_TravelIdAndEmployee_EmployeeId(travelId, e.getEmployeeId()));
+            if (role.equals("MANAGER")) {
 
-            if(!teamAssigned){
-                throw new AccessDeniedException("You have no access of this document");
+                List<Employee> team = employeeRepo.findByManager_EmployeeId(employeeId);
+
+                boolean teamAssigned = team.stream()
+                        .anyMatch(e -> travelEmployeeRepo
+                                .existsByTravel_TravelIdAndEmployee_EmployeeId(travelId, e.getEmployeeId()));
+
+                if (!teamAssigned) {
+                    throw new AccessDeniedException("You have no access of this document");
+                }
             }
+            else throw new AccessDeniedException("You have no access of it");
         }
         return modelMapper.map(document, TravelDocumentDto.class);
     }
 
+    // Update travel document details
     public TravelDocumentDto updateTravelDocumentDetails(UUID documentId, TravelDocumentDto documentDto){
         UUID userId = SecurityUtils.getCurrentUserId();
         String role = SecurityUtils.getRole();
-
-        Employee employee = employeeRepo.findByUser_UserId(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Employee not found"));
-
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         TravelDocument document = documentRepo.findById(documentId)
@@ -167,7 +170,7 @@ public class TravelDocumentService {
 
         if (!role.equals("HR")) {
             if (!document.getUploadedBy().equals(employeeId)) {
-                throw new AccessDeniedException("Only uploader can update this travel document");
+                throw new AccessDeniedException("Only document uploader can update this travel document");
             }
         }
 
@@ -181,20 +184,19 @@ public class TravelDocumentService {
         return modelMapper.map(document, TravelDocumentDto.class);
     }
 
+    // Updated travel document file
     public TravelDocumentDto updateTravelDocumentFile(UUID documentId, MultipartFile newFile) throws IOException{
 
         UUID userId = SecurityUtils.getCurrentUserId();
         String role = SecurityUtils.getRole();
-
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
-
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         TravelDocument document = documentRepo.findById(documentId).orElseThrow(() ->
                         new ResourceNotFoundException("Travel document not found"));
 
         if (!"HR".equals(role)) {
-            if (!document.getUploadedBy().equals(employeeId)) {
+            if(!document.getUploadedBy().equals(employeeId)) {
                 throw new AccessDeniedException("Only uploader or HR can replace document");
             }
         }
