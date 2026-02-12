@@ -39,7 +39,5 @@ public class TravelExpenseDto {
 
     private String hrRemark;
     private UUID travelId;
-    private UUID approvedBy;
-    private LocalDateTime approvedAt;
     private UUID employeeId;
 }

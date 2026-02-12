@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -26,10 +27,15 @@ public class BookingMember {
     @JoinColumn(name = "game_booking_id", nullable = false)
     private GameBooking gameBooking;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_slot_id")
+    private TimeSlot timeSlot;
+
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
-    private LocalDateTime joinedAt;
+    private UUID createdBy;
+    private LocalDateTime createdAt;
 
 }

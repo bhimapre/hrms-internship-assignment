@@ -27,21 +27,17 @@ public class TimeSlotController {
     private final TimeSlotService timeSlotService;
 
     // generate slots based on start and end date
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PostMapping("/api/hr/slots-generate/{gameId}")
     public ResponseEntity<String> generateSlots(
             @PathVariable UUID gameId,
-            @Valid @RequestBody TimeSlotGenerationDto request,
-            Authentication authentication
+            @Valid @RequestBody TimeSlotGenerationDto request
     ) {
-        UUID createdBy =
-                ((CustomUserDetails) authentication.getPrincipal()).getUserId();
 
         timeSlotService.generateSlots(
                 gameId,
                 request.getFromDate(),
-                request.getToDate(),
-                createdBy
+                request.getToDate()
         );
 
         return ResponseEntity.ok("Time slots generated successfully");

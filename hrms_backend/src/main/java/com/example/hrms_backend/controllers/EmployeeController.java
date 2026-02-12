@@ -20,7 +20,7 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     // Get all employees only accessible by HR
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @GetMapping("/api/hr/get-all-employee")
     public ResponseEntity<List<EmployeeDto>> getallEmployees(){
         List<EmployeeDto> employees = employeeService.getAllEmployees();
@@ -36,7 +36,7 @@ public class EmployeeController {
     }
 
     // Add employee by HR
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PostMapping("/api/hr/add-employee")
     public ResponseEntity<EmployeeDto> addEmployee(@Valid @RequestBody EmployeeDto employeeDto){
         EmployeeDto employee = employeeService.createEmployee(employeeDto);
@@ -44,7 +44,7 @@ public class EmployeeController {
     }
 
     // Updated employee details by HR
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PutMapping("/api/hr/update-employee/{employeeId}")
     public ResponseEntity<EmployeeDto> updateEmployee(@Valid @PathVariable UUID employeeId, @RequestBody EmployeeDto employeeDto){
         EmployeeDto updateEmployee =employeeService.updateEmployee(employeeId, employeeDto);

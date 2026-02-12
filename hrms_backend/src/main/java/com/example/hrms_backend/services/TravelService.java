@@ -62,7 +62,7 @@ public class TravelService {
                                     .map(Employee::getEmployeeId)
                                     .collect(Collectors.toSet());
 
-            teamEmployeeIds.add(userId);
+            teamEmployeeIds.add(employeeId);
 
             travels = travelEmployeeRepo.findByEmployee_EmployeeIdIn(teamEmployeeIds)
                     .stream()
@@ -110,6 +110,10 @@ public class TravelService {
     // create transaction for travel
     @Transactional
      public TravelDto createTravelEmployee(CreateTravelRequestDto travelDto){
+        UUID userId = SecurityUtils.getCurrentUserId();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        UUID employeeId = employee.getEmployeeId();
+
          Travel travel = modelMapper.map(travelDto, Travel.class);
 
          if(travelDto.getEmployeeIds() == null || travelDto.getEmployeeIds().isEmpty()){
@@ -122,7 +126,7 @@ public class TravelService {
          }
 
          travel.setTravelStatus(TravelStatus.CREATED);
-         travel.setCreatedBy(SecurityUtils.getCurrentUserId());
+         travel.setCreatedBy(employeeId);
          travel.setCreatedAt(LocalDateTime.now());
 
          travel = travelRepo.save(travel);
@@ -137,14 +141,18 @@ public class TravelService {
              travelEmployee.setTravel(travel);
              travelEmployee.setEmployee(emp);
              travelEmployee.setCreatedAt(LocalDateTime.now());
-             travelEmployee.setCreatedBy(SecurityUtils.getCurrentUserId());
+             travelEmployee.setCreatedBy(employeeId);
              travelEmployeeRepo.save(travelEmployee);
          }
          return modelMapper.map(travel, TravelDto.class);
      }
 
+     // Update Travel
     @Transactional
     public TravelDto updateTravel(UUID travelId, TravelDto travelDto) {
+        UUID userId = SecurityUtils.getCurrentUserId();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        UUID employeeId = employee.getEmployeeId();
 
         Travel travel = travelRepo.findById(travelId).orElseThrow(() -> new ResourceNotFoundException(TRAVEL_NOT_FOUND));
         String role = SecurityUtils.getRole();
@@ -168,6 +176,8 @@ public class TravelService {
         travel.setTravelDateFrom(travelDto.getTravelDateFrom());
         travel.setTravelDateTo(travelDto.getTravelDateTo());
         travel.setTravelStatus(travelDto.getTravelStatus());
+        travel.setUpdatedAt(LocalDateTime.now());
+        travel.setUpdatedBy(employeeId);
 
         return modelMapper.map(travelRepo.save(travel), TravelDto.class);
     }

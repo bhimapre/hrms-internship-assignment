@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -36,6 +37,9 @@ public class GameBooking {
     @Column(name = "booking_status")
     @Enumerated(EnumType.STRING)
     private BookingStatus bookingStatus;
+
+    @OneToMany(mappedBy = "gameBooking")
+    private List<BookingMember> bookingMembers;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

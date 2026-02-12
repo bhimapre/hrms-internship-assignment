@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.UUID;
 
 public interface TravelExpenseProofRepo extends JpaRepository<TravelExpenseProof, UUID> {
+
+    TravelExpenseProof findByTravelExpense_TravelExpenseId(UUID travelExpenseTravelExpenseId);
 }

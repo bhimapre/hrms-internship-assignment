@@ -19,7 +19,7 @@ public class GameController {
     private final GameService gameService;
 
     // Add Game by HR
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PostMapping("/api/hr/add-game")
     public ResponseEntity<GameDto> addGame(@Valid @RequestBody GameDto gameDto){
         GameDto game = gameService.createGame(gameDto);
