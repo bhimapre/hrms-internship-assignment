@@ -18,12 +18,14 @@ public class TravelExpenseController {
 
     private final TravelExpenseService travelExpenseService;
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/api/expense")
     public ResponseEntity<TravelExpenseDto> addTravelExpense(@Valid @RequestBody TravelExpenseDto travelExpenseDto){
         TravelExpenseDto expense = travelExpenseService.addExpense(travelExpenseDto);
         return new ResponseEntity<>(expense, HttpStatus.CREATED);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("api/expense/submit/{expenseId}")
     public ResponseEntity<Void> submitTravelExpense(@PathVariable UUID expenseId){
         travelExpenseService.submitExpense(expenseId);
@@ -44,19 +46,29 @@ public class TravelExpenseController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/expense")
     public ResponseEntity<List<TravelExpenseDto>> getAllExpense(){
         return ResponseEntity.ok(travelExpenseService.getAllExpense());
     }
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/expense/{expenseId}")
     public ResponseEntity<TravelExpenseDto> getExpenseById(@PathVariable UUID expenseId){
         return ResponseEntity.ok(travelExpenseService.getTravelExpenseById(expenseId));
     }
 
-    @PutMapping("/api/expense/{expenseId}")
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/api/expense/cancel/{expenseId}")
     public ResponseEntity<Void> cancelExpense(@PathVariable UUID expenseId){
         travelExpenseService.cancelExpense(expenseId);
         return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PutMapping("/api/expense/{expenseId}")
+    public ResponseEntity<TravelExpenseDto> updateExpenseDetails(@PathVariable UUID expenseId, @Valid @RequestBody TravelExpenseDto travelExpenseDto){
+        travelExpenseService.updateTravelExpenseDetails(expenseId, travelExpenseDto);
+        return new ResponseEntity<>(travelExpenseDto, HttpStatus.OK);
     }
 }

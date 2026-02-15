@@ -3,10 +3,12 @@ package com.example.hrms_backend.controllers;
 import com.example.hrms_backend.dto.JobReferralDto;
 import com.example.hrms_backend.dto.JobReferralStatusDto;
 import com.example.hrms_backend.services.JobReferralService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -22,13 +24,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JobReferralController {
 
-    private JobReferralService jobReferralService;
+    private final JobReferralService jobReferralService;
 
     @PreAuthorize("isAuthenticated()")
-    @PostMapping("/api/job-referral/{jobOpeningId}")
-    public ResponseEntity<JobReferralDto> createJobReferral(@PathVariable UUID jobOpeningId, @Valid @RequestPart("data") JobReferralDto referralDto, @RequestPart("file") MultipartFile file) throws IOException {
-        JobReferralDto referral = jobReferralService.createJobReferral(jobOpeningId, referralDto, file);
-        log.info("Job referral created: id={}, name={}, email={}", referralDto.getJobReferralId(), referralDto.getName(), referralDto.getEmail());
+    @PostMapping(value = "/api/job-referral/{jobOpeningId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<JobReferralDto> createJobReferral(@PathVariable UUID jobOpeningId, @Valid @RequestPart("data") String data, @RequestPart("file") MultipartFile file) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JobReferralDto dto = mapper.readValue(data, JobReferralDto.class);
+        JobReferralDto referral = jobReferralService.createJobReferral(jobOpeningId, dto, file);
+        log.info("Job referral created: id={}, name={}, email={}", dto.getJobReferralId(), dto.getName(), dto.getEmail());
         return new ResponseEntity<>(referral, HttpStatus.CREATED);
     }
 

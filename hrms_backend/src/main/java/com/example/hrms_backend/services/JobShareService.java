@@ -34,6 +34,7 @@ public class JobShareService {
     private final EmailService emailService;
     private final JobOpeningRepo jobOpeningRepo;
 
+    // Job share
     public JobShareDto createJobShare(JobShareRequestDto requestDto){
         UUID userId = SecurityUtils.getCurrentUserId();
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
@@ -48,7 +49,7 @@ public class JobShareService {
         jobShare.setCreatedBy(employeeId);
         jobShare.setCreatedAt(LocalDateTime.now());
 
-        jobShareRepo.save(jobShare);
+        jobShare = jobShareRepo.save(jobShare);
 
         JobOpening jobOpening = jobOpeningRepo.findById(requestDto.getJobOpening()).orElseThrow(() -> new ResourceNotFoundException("Job opening not found"));
 
@@ -71,9 +72,8 @@ public class JobShareService {
             }
 
             emailsList.add(jobShareEmails);
+            jobShareEmails = emailRepo.save(jobShareEmails);
         }
-        emailRepo.saveAll(emailsList);
-
         return modelMapper.map(jobShare, JobShareDto.class);
     }
 }

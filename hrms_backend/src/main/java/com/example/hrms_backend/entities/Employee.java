@@ -83,8 +83,11 @@ public class Employee {
     )
     private Set<Game> gamePreferences = new HashSet<>();
 
-    @Column(name = "photo_path")
-    private String photoPath;
+    @Column(name = "profile_picture_file_url")
+    private String profilePictureFileUrl;
+
+    @Column(name =  "public_id")
+    private String publicId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false, unique = true)

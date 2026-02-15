@@ -9,5 +9,4 @@ import java.util.UUID;
 public class EmployeeProfileUpdate {
     private UUID employeeId;
     private Set<UUID> gamePreferences;
-    private String photoPath;
 }

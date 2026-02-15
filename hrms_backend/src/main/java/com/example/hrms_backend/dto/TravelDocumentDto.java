@@ -15,10 +15,7 @@ public class TravelDocumentDto {
     @Size(min = 2, max =  100, message = "Document Name must be between 2 and 100 characters long")
     private String documentName;
 
-    @NotBlank(message = "Owner Type is required")
     private String ownerType;
-
-    @NotBlank(message = "file url is required")
     private String travelDocumentFileUrl;
 
     private UUID travelId;

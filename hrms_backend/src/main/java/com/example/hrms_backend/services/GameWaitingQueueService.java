@@ -39,6 +39,11 @@ public class GameWaitingQueueService {
 
         TimeSlot slot = timeSlotRepo.findById(waitingQueueDto.getTimeSlotId()).orElseThrow(() -> new ResourceNotFoundException("Time slot not found"));
 
+        // Check if employee have preference for this game
+        if(!employee.getGamePreferences().contains(slot.getGame())){
+            throw new BadRequestException("You must select this game preference before joining the queue");
+        }
+
         // Check that you are not joining past slot
         LocalDateTime slotStartDateTime = LocalDateTime.of(slot.getSlotDate(), slot.getStartTime());
         if(slotStartDateTime.isBefore(LocalDateTime.now())){

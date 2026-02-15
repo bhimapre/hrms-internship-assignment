@@ -4,12 +4,14 @@ import com.example.hrms_backend.dto.JobOpeningDto;
 import com.example.hrms_backend.dto.TravelDocumentDto;
 import com.example.hrms_backend.entities.JobOpening;
 import com.example.hrms_backend.services.JobOpeningService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -23,17 +25,19 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class JobOpeningController {
 
-    private JobOpeningService jobOpeningService;
+    private final JobOpeningService jobOpeningService;
 
     @PreAuthorize("hasAuthority('HR')")
-    @PostMapping("/api/hr/job-opening")
-    public ResponseEntity<JobOpeningDto> createJobOpening(@RequestPart("file") MultipartFile file, @Valid @RequestPart("data") JobOpeningDto jobOpeningDto) throws IOException {
-        JobOpeningDto jobOpening = jobOpeningService.createJobOpening(jobOpeningDto, file);
+    @PostMapping(value = "/api/hr/job-opening", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<JobOpeningDto> createJobOpening(@RequestPart("file") MultipartFile file, @Valid @RequestPart("data") String data) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        JobOpeningDto openingDto = mapper.readValue(data, JobOpeningDto.class);
+        JobOpeningDto jobOpening = jobOpeningService.createJobOpening(openingDto, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(jobOpening);
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/api/open/job-opening")
+    @GetMapping("/api/job-opening")
     public ResponseEntity <List<JobOpeningDto>> allOpenJobs(){
        List<JobOpeningDto> jobOpeningDto = jobOpeningService.getAllOpenJobs();
        return new ResponseEntity<>(jobOpeningDto, HttpStatus.OK);
@@ -47,7 +51,7 @@ public class JobOpeningController {
     }
 
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/api/open/job-opening/{jobOpeningId}")
+    @GetMapping("/api/job-opening/{jobOpeningId}")
     public ResponseEntity<JobOpeningDto> getOpenJobById(@PathVariable UUID jobOpeningId){
         JobOpeningDto jobOpening = jobOpeningService.getOpenJobById(jobOpeningId);
         return new ResponseEntity<>(jobOpening, HttpStatus.OK);
@@ -68,7 +72,7 @@ public class JobOpeningController {
     }
 
     @PreAuthorize("hasAuthority('HR')")
-    @PutMapping("/api/hr/job-opening/{jobOpeningId}")
+    @PutMapping("/api/hr/job-opening/file/{jobOpeningId}")
     public ResponseEntity<JobOpeningDto> updateJobDescription(@PathVariable UUID jobOpeningId, @RequestPart("file")MultipartFile file) throws IOException{
         JobOpeningDto openingDto = jobOpeningService.updateJobDescriptionFile(jobOpeningId, file);
         return new ResponseEntity<>(openingDto, HttpStatus.OK);

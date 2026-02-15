@@ -11,6 +11,7 @@ import com.example.hrms_backend.entities.JobReferral;
 import com.example.hrms_backend.entities.enums.EmailStatus;
 import com.example.hrms_backend.entities.enums.JobOpeningStatus;
 import com.example.hrms_backend.entities.enums.JobReferralStatus;
+import com.example.hrms_backend.entities.enums.NotificationType;
 import com.example.hrms_backend.exception.BadRequestException;
 import com.example.hrms_backend.exception.ResourceNotFoundException;
 import com.example.hrms_backend.repositories.EmployeeRepo;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -43,8 +45,10 @@ public class JobReferralService {
     private static final String JOB_REFERRAL_NOT_FOUND = "Job referral not found";
     private static final String EMPLOYEE_NOT_FOUND = "Employee not found";
     private final EmailService emailService;
+    private final NotificationService notificationService;
 
     // Create job referral
+    @Transactional
     public JobReferralDto createJobReferral(UUID jobOpeningId, JobReferralDto jobReferralDto, MultipartFile file) throws IOException{
 
         String contentType = file.getContentType();
@@ -69,7 +73,6 @@ public class JobReferralService {
                 ObjectUtils.asMap("folder", "jobOpening/jobReferrals")
         );
 
-
         jobReferral.setCvFileUrl(uploadResult.get("secure_url").toString());
         jobReferral.setPublicId(uploadResult.get("public_id").toString());
         jobReferral.setJobReferralStatus(JobReferralStatus.NEW);
@@ -86,7 +89,11 @@ public class JobReferralService {
         jobReferral.setCreatedAt(LocalDateTime.now());
         jobReferral.setCreatedBy(employeeId);
 
-        jobReferralRepo.save(jobReferral);
+        jobReferral = jobReferralRepo.save(jobReferral);
+        notificationService.sendNotification(jobOpening.getCreatedBy(), "Job Referral Alert",
+                "New Job referral alert by " + employeeId + " for " + jobOpening.getJobTitle(),
+                NotificationType.JOB_REFERRAL);
+
         return modelMapper.map(jobReferral, JobReferralDto.class);
     }
 

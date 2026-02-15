@@ -54,13 +54,13 @@ public class Travel {
     @Column(name = "travel_status", nullable = false)
     private TravelStatus travelStatus;
 
-    @OneToMany(mappedBy = "travel")
+    @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelEmployee> travelEmployees;
 
-    @OneToMany(mappedBy = "travel")
+    @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelExpense> travelExpenses;
 
-    @OneToMany(mappedBy = "travel")
+    @OneToMany(mappedBy = "travel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelDocument> travelDocuments;
 
     @Column(name = "created_at")

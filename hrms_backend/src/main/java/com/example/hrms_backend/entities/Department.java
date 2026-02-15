@@ -3,6 +3,9 @@ package com.example.hrms_backend.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
@@ -10,6 +13,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "departments")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Department {
 
     @Id

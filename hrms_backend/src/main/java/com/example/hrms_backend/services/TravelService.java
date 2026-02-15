@@ -5,6 +5,7 @@ import com.example.hrms_backend.dto.TravelDto;
 import com.example.hrms_backend.entities.Employee;
 import com.example.hrms_backend.entities.Travel;
 import com.example.hrms_backend.entities.TravelEmployee;
+import com.example.hrms_backend.entities.enums.NotificationType;
 import com.example.hrms_backend.entities.enums.TravelStatus;
 import com.example.hrms_backend.exception.BadRequestException;
 import com.example.hrms_backend.exception.ResourceNotFoundException;
@@ -14,6 +15,7 @@ import com.example.hrms_backend.repositories.TravelRepo;
 import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,12 +36,15 @@ public class TravelService {
     private static final String TRAVEL_NOT_FOUND = "Travel not found";
     private final TravelEmployeeRepo travelEmployeeRepo;
     private final EmployeeRepo employeeRepo;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
+    private static final String EMPLOYEE_NOT_FOUND = "Employee not found";
 
     // Get all travels
     public List<TravelDto> getAllTravel(){
         String role = SecurityUtils.getRole();
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         List<Travel> travels;
@@ -48,7 +53,7 @@ public class TravelService {
             travels = travelRepo.findAll();
         }
         else if (role.equals("EMPLOYEE")) {
-            travels = travelEmployeeRepo.findAllByEmployee_Employee(employeeId)
+            travels = travelEmployeeRepo.findByEmployee_EmployeeId(employeeId)
                     .stream()
                     .map(TravelEmployee::getTravel)
                     .distinct()
@@ -85,7 +90,8 @@ public class TravelService {
 
         String role = SecurityUtils.getRole();
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
+
         UUID employeeId = employee.getEmployeeId();
 
         if (role.equals("HR")) {
@@ -103,6 +109,9 @@ public class TravelService {
 
             hasAccess = travelEmployeeRepo.existsByTravel_TravelIdAndEmployee_EmployeeIdIn(travelId, teamIds);
         }
+        if(!hasAccess && role.equals("EMPLOYEE")){
+            throw new AccessDeniedException("You have no access of it");
+        }
 
         return modelMapper.map(travel, TravelDto.class);
     }
@@ -111,7 +120,7 @@ public class TravelService {
     @Transactional
      public TravelDto createTravelEmployee(CreateTravelRequestDto travelDto){
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
          Travel travel = modelMapper.map(travelDto, Travel.class);
@@ -134,7 +143,7 @@ public class TravelService {
          for(UUID empId: travelDto.getEmployeeIds()){
 
              Employee emp = employeeRepo.findById(empId).orElseThrow(() -> new
-                     ResourceNotFoundException("Employee not found"));
+                     ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
 
              TravelEmployee travelEmployee = new TravelEmployee();
 
@@ -142,7 +151,17 @@ public class TravelService {
              travelEmployee.setEmployee(emp);
              travelEmployee.setCreatedAt(LocalDateTime.now());
              travelEmployee.setCreatedBy(employeeId);
-             travelEmployeeRepo.save(travelEmployee);
+             travelEmployee = travelEmployeeRepo.save(travelEmployee);
+
+//             try{
+//                 emailService.sendTravelAssignEmployee(emp.getEmail(), travel.getTravelTitle(), travel.getTravelLocation(), travel.getTravelDateFrom(), travel.getTravelDateTo());
+//             }
+//             catch (Exception e){
+//                throw new RuntimeException("Failed to send email");
+//             }
+             notificationService.sendNotification(emp.getEmployeeId(), travel.getTravelTitle(),
+                     "You have assign new travel. Please check more details on travel section.",
+                     NotificationType.TRAVEL_PLAN);
          }
          return modelMapper.map(travel, TravelDto.class);
      }
@@ -151,7 +170,7 @@ public class TravelService {
     @Transactional
     public TravelDto updateTravel(UUID travelId, TravelDto travelDto) {
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         Travel travel = travelRepo.findById(travelId).orElseThrow(() -> new ResourceNotFoundException(TRAVEL_NOT_FOUND));

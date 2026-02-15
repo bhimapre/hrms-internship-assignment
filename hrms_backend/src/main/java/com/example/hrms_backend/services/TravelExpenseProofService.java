@@ -81,19 +81,20 @@ public class TravelExpenseProofService {
         expenseProof.setCreatedAt(LocalDateTime.now());
         expenseProof.setCreatedBy(employeeId);
         expenseProof.setTravelExpense(expense);
+        expenseProof = proofRepo.save(expenseProof);
 
         return expenseProof.getExpenseFileUrl();
     }
 
     // Update travel expense proofs
-    public TravelExpenseProofDto updateExpenseProof(UUID expenseId, MultipartFile newFile) throws IOException{
+    public TravelExpenseProofDto updateExpenseProof(UUID expenseProofId, MultipartFile newFile) throws IOException{
 
         UUID userId = SecurityUtils.getCurrentUserId();
         String role = SecurityUtils.getRole();
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
         UUID employeeId = employee.getEmployeeId();
 
-        TravelExpenseProof expenseProof = proofRepo.findByTravelExpense_TravelExpenseId(expenseId);
+        TravelExpenseProof expenseProof = proofRepo.findById(expenseProofId).orElseThrow(() -> new ResourceNotFoundException("Expense Proof not found"));
 
         if(!role.equals("HR")){
             if(!expenseProof.getUploadedBy().equals(employeeId)){
@@ -133,7 +134,7 @@ public class TravelExpenseProofService {
         expenseProof.setUpdatedAt(LocalDateTime.now());
         expenseProof.setUploadedBy(employeeId);
 
-        proofRepo.save(expenseProof);
+        expenseProof = proofRepo.save(expenseProof);
         return modelMapper.map(expenseProof, TravelExpenseProofDto.class);
     }
 }

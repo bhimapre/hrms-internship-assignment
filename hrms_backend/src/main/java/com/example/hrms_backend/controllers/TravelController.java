@@ -42,6 +42,7 @@ public class TravelController {
         return ResponseEntity.ok(travelService.getTravelById(travelId));
     }
 
+    // Update travel details
     @PreAuthorize("hasAuthority('HR')")
     @PutMapping("/api/travels/{travelId}")
     public ResponseEntity<TravelDto> updateTravel(@PathVariable UUID travelId, @Valid @RequestBody TravelDto travelDto){

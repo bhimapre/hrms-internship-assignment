@@ -1,27 +1,31 @@
 package com.example.hrms_backend.services;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.hrms_backend.dto.EmployeeDto;
 import com.example.hrms_backend.dto.EmployeeProfileUpdate;
 import com.example.hrms_backend.entities.Department;
 import com.example.hrms_backend.entities.Employee;
 import com.example.hrms_backend.entities.Game;
+import com.example.hrms_backend.exception.BadRequestException;
 import com.example.hrms_backend.exception.ResourceNotFoundException;
 import com.example.hrms_backend.repositories.DepartmentRepo;
 import com.example.hrms_backend.repositories.EmployeeRepo;
 import com.example.hrms_backend.repositories.GameRepo;
 import com.example.hrms_backend.repositories.UserRepo;
+import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.lang.module.ResolutionException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,7 @@ public class EmployeeService {
     private final UserRepo userRepo;
     private final GameRepo gameRepo;
     private static final String EMPLOYEE_NOT_FOUND = "Employee not found";
+    private final Cloudinary cloudinary;
 
     // Get All Employees
     public List<EmployeeDto> getAllEmployees(){
@@ -51,14 +56,6 @@ public class EmployeeService {
     // Add Employee
     public EmployeeDto createEmployee(EmployeeDto employeeDto){
         Employee employee = modelMapper.map(employeeDto, Employee.class);
-        employee.setName(employeeDto.getName());
-        employee.setEmail(employeeDto.getEmail());
-        employee.setCity(employeeDto.getCity());
-        employee.setDob(employeeDto.getDob());
-        employee.setPhoneNumber(employeeDto.getPhoneNumber());
-        employee.setAddress(employeeDto.getAddress());
-        employee.setJoiningDate(employeeDto.getJoiningDate());
-        employee.setDesignation(employeeDto.getDesignation());
         Department department = departmentRepo.findById(employeeDto.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Department not found"));
         employee.setDepartment(department);
         if(employeeDto.getManagerId() != null)
@@ -68,8 +65,8 @@ public class EmployeeService {
         }
         employee.setUser(userRepo.findById(employeeDto.getUserId()).orElseThrow(() -> new ResourceNotFoundException("User not found")));
 
-        Employee saved = employeeRepo.save(employee);
-        return modelMapper.map(saved, EmployeeDto.class);
+        employee = employeeRepo.save(employee);
+        return modelMapper.map(employee, EmployeeDto.class);
     }
 
     // Update Employee
@@ -143,12 +140,56 @@ public class EmployeeService {
 
             if(games.size() != gameIds.size())
             {
-                throw new IllegalArgumentException("Games not found");
+                throw new ResourceNotFoundException("Games not found");
+            }
+
+            for(Game game: games){
+                if(!game.isActive()){
+                    throw new BadRequestException("You cannot add this game as preference");
+                }
             }
 
             employee.setGamePreferences(new HashSet<>(games));
         }
 
         employeeRepo.save(employee);
+    }
+
+    // Add & update profile picture
+    public String uploadProfilePicture(MultipartFile file) throws IOException {
+
+        String contentType = file.getContentType();
+        UUID userId = SecurityUtils.getCurrentUserId();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
+        UUID employeeId = employee.getEmployeeId();
+
+        if (contentType == null || !(contentType.equals("image/png")
+                || contentType.equals("image/jpeg") || contentType.equals("image/jpg"))) {
+            throw new BadRequestException("Only JPG, PNG, JPEG are allowed");
+        }
+
+        if (file.getSize() > 10 * 1024 * 1024) {
+            throw new BadRequestException("File size must be less than 10 MB");
+        }
+
+        if(employee.getPublicId() != null && !employee.getPublicId().isBlank()){
+            cloudinary.uploader().destroy(
+                    employee.getPublicId(),
+                    ObjectUtils.emptyMap()
+            );
+        }
+
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(
+                file.getBytes(),
+                ObjectUtils.asMap("folder", "employee/profilePictures")
+        );
+
+        employee.setProfilePictureFileUrl(uploadResult.get("secure_url").toString());
+        employee.setPublicId(uploadResult.get("public_id").toString());
+        employee.setUpdatedAt(LocalDateTime.now());
+        employee.setUpdatedBy(employeeId);
+        employee = employeeRepo.save(employee);
+
+        return employee.getProfilePictureFileUrl();
     }
 }

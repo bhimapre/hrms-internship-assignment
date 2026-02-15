@@ -38,7 +38,7 @@ public class TravelExpense {
 
     @Column(name = "expense_date", nullable = false)
     @DateTimeFormat(pattern = "yyyy/MM/dd")
-    @NotBlank(message = "Expense date is required")
+    @NotNull(message = "Expense date is required")
     private LocalDate expenseDate;
 
     @NotNull(message = "Expense amount is required")
@@ -48,11 +48,11 @@ public class TravelExpense {
 
     @Column(name = "expense_category", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Enum<TravelExpenseCategory> expenseCategory;
+    private TravelExpenseCategory expenseCategory;
 
     @Column(name = "expense_status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Enum<ExpenseStatus> expenseStatus;
+    private ExpenseStatus expenseStatus;
 
     @Column(name = "hr_remark")
     private String hrRemark;
@@ -61,7 +61,7 @@ public class TravelExpense {
     @JoinColumn(name = "travel_id")
     private Travel travel;
 
-    @OneToMany(mappedBy = "travelExpense")
+    @OneToMany(mappedBy = "travelExpense", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TravelExpenseProof> travelExpenseProofs;
 
     @Column(name = "approved_by")

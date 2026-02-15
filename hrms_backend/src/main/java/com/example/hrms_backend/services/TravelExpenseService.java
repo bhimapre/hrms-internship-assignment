@@ -4,6 +4,7 @@ import com.example.hrms_backend.dto.TravelDto;
 import com.example.hrms_backend.dto.TravelExpenseDto;
 import com.example.hrms_backend.entities.*;
 import com.example.hrms_backend.entities.enums.ExpenseStatus;
+import com.example.hrms_backend.entities.enums.NotificationType;
 import com.example.hrms_backend.exception.BadRequestException;
 import com.example.hrms_backend.exception.ResourceNotFoundException;
 import com.example.hrms_backend.repositories.EmployeeRepo;
@@ -34,6 +35,7 @@ public class TravelExpenseService {
     private final TravelRepo travelRepo;
     private final TravelEmployeeRepo travelEmployeeRepo;
     private final ModelMapper modelMapper;
+    private final NotificationService notificationService;
 
     // Add Expense
     public TravelExpenseDto addExpense(TravelExpenseDto travelExpenseDto){
@@ -59,10 +61,10 @@ public class TravelExpenseService {
             throw new BadRequestException("Expense Date is not before travel start date or You miss the end date of submit expenses");
         }
 
-        expense.setExpenseName(travelExpenseDto.getExpenseName());
-        expense.setExpenseAmount(travelExpenseDto.getExpenseAmount());
-        expense.setExpenseDate(travelExpenseDto.getExpenseDate());
-        expense.setExpenseCategory(travelExpenseDto.getExpenseCategory());
+//        expense.setExpenseName(travelExpenseDto.getExpenseName());
+//        expense.setExpenseAmount(travelExpenseDto.getExpenseAmount());
+//        expense.setExpenseDate(travelExpenseDto.getExpenseDate());
+//        expense.setExpenseCategory(travelExpenseDto.getExpenseCategory());
         expense.setExpenseStatus(ExpenseStatus.DRAFT);
         expense.setTravel(travel);
         expense.setEmployee(employee);
@@ -99,6 +101,10 @@ public class TravelExpenseService {
         expense.setUpdatedBy(employeeId);
 
         expense = travelExpenseRepo.save(expense);
+
+        notificationService.sendNotification(employeeId, expense.getExpenseName(),
+                "New Expense submitted by: " + employee.getName() + "for:  " + expense.getTravel().getTravelTitle(),
+                NotificationType.EXPENSE_SUBMIT);
     }
 
     // Approve by HR
@@ -125,6 +131,7 @@ public class TravelExpenseService {
         expense.setApprovedBy(employeeId);
         expense.setUpdatedAt(LocalDateTime.now());
         expense.setUpdatedBy(employeeId);
+        expense = travelExpenseRepo.save(expense);
     }
 
     // Reject by HR
@@ -136,7 +143,7 @@ public class TravelExpenseService {
 
         TravelExpense expense = travelExpenseRepo.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
-        if(!expense.getExpenseStatus().equals(ExpenseStatus.SUBMITTED)){
+        if(expense.getExpenseStatus().equals(ExpenseStatus.DRAFT) || expense.getExpenseStatus().equals(ExpenseStatus.REJECTED)){
             throw new AccessDeniedException("Expense status is different");
         }
 
@@ -149,6 +156,7 @@ public class TravelExpenseService {
         expense.setHrRemark(remark);
         expense.setUpdatedAt(LocalDateTime.now());
         expense.setUpdatedBy(employeeId);
+        expense = travelExpenseRepo.save(expense);
     }
 
     // Get all expenses
@@ -233,7 +241,7 @@ public class TravelExpenseService {
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
         UUID employeeId = employee.getEmployeeId();
 
-        TravelExpense expense = modelMapper.map(expenseDto, TravelExpense.class);
+        TravelExpense expense = travelExpenseRepo.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("No travel expense found"));
         if(!role.equals("HR")){
             if(!expense.getCreatedBy().equals(employeeId)){
                 throw new AccessDeniedException("You have no access of it");

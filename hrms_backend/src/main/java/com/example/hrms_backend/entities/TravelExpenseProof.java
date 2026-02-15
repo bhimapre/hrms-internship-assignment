@@ -31,7 +31,7 @@ public class TravelExpenseProof {
     private String publicId;
 
     @Column(name = "uploaded_by", nullable = false)
-    @NotBlank(message = "Uploaded by is required")
+    @NotNull(message = "Uploaded by is required")
     private UUID uploadedBy;
 
     @ManyToOne(fetch = FetchType.LAZY)

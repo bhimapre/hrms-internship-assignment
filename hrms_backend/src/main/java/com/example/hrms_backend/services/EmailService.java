@@ -8,6 +8,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -75,4 +78,31 @@ public class EmailService {
         }
     }
 
+    // Send email when new travel created
+    public void sendTravelAssignEmployee(String toEmail, String travelTitle, String travelLocation, LocalDate travelDateFrom, LocalDate travelDateTo){
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            String formateStratDate = dateFormat.format(travelDateFrom);
+            String formateEndDate = dateFormat.format(travelDateTo);
+
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+
+            helper.setTo(toEmail);
+            helper.setSubject("New Travel Assign - " + travelTitle);
+
+            String template = templateUtil.loadTemplate("travel-assign-template.html");
+
+            template = template.replace("{{travelTitle}}", travelTitle);
+            template = template.replace("{{travelLocation}}", travelLocation);
+            template = template.replace("{{travelDateFrom}}", formateStratDate);
+            template = template.replace("{{travelDateTo}}", formateEndDate);
+
+            helper.setText(template, true);
+            mailSender.send(mimeMessage);
+        }
+        catch (Exception e){
+            throw new RuntimeException("Failed to send email");
+        }
+    }
 }

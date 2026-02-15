@@ -187,7 +187,7 @@ public class JobOpeningService {
         jobOpening.setUpdatedBy(employeeId);
         jobOpening.setUpdatedAt(LocalDateTime.now());
 
-        jobOpeningRepo.save(jobOpening);
+        jobOpening = jobOpeningRepo.save(jobOpening);
         return modelMapper.map(jobOpening, JobOpeningDto.class);
     }
 }

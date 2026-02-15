@@ -46,7 +46,6 @@ public class JobOpeningDto {
     @Enumerated(EnumType.STRING)
     private JobOpeningStatus jobOpeningStatus;
 
-    @NotNull(message = "Job description file url is required")
     private String jobDescriptionFileUrl;
 
     private List<JobReferral> jobReferrals;

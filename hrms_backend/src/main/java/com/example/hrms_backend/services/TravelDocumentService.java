@@ -77,14 +77,14 @@ public class TravelDocumentService {
 
         travelDocument.setTravelDocumentFileUrl(uploadResult.get("secure_url").toString());
         travelDocument.setPublicId(uploadResult.get("public_id").toString());
-        travelDocument.setDocumentName(documentDto.getDocumentName());
         travelDocument.setOwnerType(SecurityUtils.getRole());
-        travelDocument.setUploadedBy(SecurityUtils.getCurrentUserId());
+        travelDocument.setUploadedBy(employeeId);
         travelDocument.setTravel(travel);
+//        travelDocument.setEmployee(employee);
         travelDocument.setCreatedAt(LocalDateTime.now());
-        travelDocument.setCreatedBy(userId);
+        travelDocument.setCreatedBy(employeeId);
 
-        documentRepo.save(travelDocument);
+        travelDocument = documentRepo.save(travelDocument);
         return travelDocument.getTravelDocumentFileUrl();
     }
 
@@ -108,7 +108,9 @@ public class TravelDocumentService {
                     .map(Employee::getEmployeeId)
                     .toList();
 
-            List<UUID> travelIds = travelEmployeeRepo.findTravelIdsByEmployeeIds(employeeIds);
+            List<UUID> travelIds = travelEmployeeRepo.findByEmployee_EmployeeIdIn(employeeIds)
+                    .stream().map(e -> e.getTravel().getTravelId())
+                    .distinct().toList();
 
             documents = documentRepo.findByTravel_TravelIdIn(travelIds);
 

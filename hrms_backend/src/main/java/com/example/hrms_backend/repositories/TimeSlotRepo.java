@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -19,4 +20,18 @@ public interface TimeSlotRepo extends JpaRepository<TimeSlot, UUID> {
 """)
     List<TimeSlot> findSlotsByGameAndDate(@Param("gameId") UUID gameId,
         @Param("slotDate") LocalDate slotDate);
+
+    @Query("""
+    select ts from TimeSlot ts where ts.slotDate = :date
+    and ts.startTime >= :startTime and ts.startTime <= :endTime
+""")
+    List<TimeSlot> findBySlotDateAndStartTimeBetween(LocalDate slotDate, LocalTime startTimeAfter, LocalTime startTimeBefore);
+
+    @Query("""
+    select ts from TimeSlot ts where ts.slotDate = :date
+    and ts.startTime >= :startTime and ts.startTime <= :endTime
+""")
+    List<TimeSlot> findUpcomingSlots(@Param("date") LocalDate date,
+                                     @Param("startTime") LocalTime startTime,
+                                     @Param("endTime") LocalTime endTime);
 }

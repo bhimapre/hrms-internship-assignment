@@ -26,13 +26,6 @@ public class JobReferralDto {
     @NotBlank(message = "Phone Number is required")
     @Size(min = 10, max =  10, message = "Phone Number size must be 10 digits")
     private String phoneNumber;
-
-    @NotNull(message = "CV file url is required")
-    private String cvFileUrl;
-
-    @NotNull(message = "public id is required")
-    private String publicId;
-
     private String shortNote;
     private UUID jobOpening;
     private UUID employee;

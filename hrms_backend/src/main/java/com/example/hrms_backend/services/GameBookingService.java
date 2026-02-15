@@ -1,9 +1,12 @@
 package com.example.hrms_backend.services;
 
+import com.example.hrms_backend.dto.BookingDetailsDto;
+import com.example.hrms_backend.dto.BookingParticipantsDto;
 import com.example.hrms_backend.dto.CreateGameBookingDto;
 import com.example.hrms_backend.dto.GameBookingDto;
 import com.example.hrms_backend.entities.*;
 import com.example.hrms_backend.entities.enums.BookingStatus;
+import com.example.hrms_backend.entities.enums.NotificationType;
 import com.example.hrms_backend.exception.BadRequestException;
 import com.example.hrms_backend.exception.ResourceNotFoundException;
 import com.example.hrms_backend.repositories.*;
@@ -17,10 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +33,7 @@ public class GameBookingService {
     private final TimeSlotRepo timeSlotRepo;
     private final GameRepo gameRepo;
     private final GameTimeSlotConfigRepo gameTimeSlotConfigRepo;
+    private final NotificationService notificationService;
 
     @Transactional
     public GameBookingDto createGameBooking(CreateGameBookingDto createGameBookingDto){
@@ -43,6 +44,10 @@ public class GameBookingService {
         TimeSlot timeSlot = timeSlotRepo.findById(createGameBookingDto.getTimeSlotId()).orElseThrow(() -> new ResourceNotFoundException("Time slot not found"));
         Game game = gameRepo.findById(createGameBookingDto.getGameId()).orElseThrow(() -> new ResourceNotFoundException("Game is not found"));
         GameTimeSlotConfig timeSlotConfig = gameTimeSlotConfigRepo.findByGame_GameId(game.getGameId()).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
+
+        if(!employee.getGamePreferences().contains(game)){
+            throw new BadRequestException("You must select this game preference before booking game slot");
+        }
 
         List<UUID> members = createGameBookingDto.getMemberIds();
         long memberCount = members.size();
@@ -116,6 +121,10 @@ public class GameBookingService {
 
         booking = gameBookingRepo.save(booking);
 
+        notificationService.sendNotification(employee.getEmployeeId(), "Game Booking Alert",
+                booking.getGame().getGameName() + " booking successful on " + timeSlot.getSlotDate() + " form " + timeSlot.getStartTime() + " to " + timeSlot.getEndTime(),
+                NotificationType.GAME_BOOKING);
+
         for(UUID memberId : members){
 
             Employee emp = employeeRepo.findById(memberId).orElseThrow(() -> new
@@ -129,6 +138,10 @@ public class GameBookingService {
             bookingMember.setCreatedBy(createGameBookingDto.getBookerId());
             bookingMember.setCreatedAt(LocalDateTime.now());
             gameBookingMemberRepo.save(bookingMember);
+
+            notificationService.sendNotification(emp.getEmployeeId(), "Game Booking Alert",
+                    booking.getGame().getGameName() + " booking successful on " + timeSlot.getSlotDate() + " form " + timeSlot.getStartTime() + " to " + timeSlot.getEndTime(),
+                    NotificationType.GAME_BOOKING);
         }
         return modelMapper.map(booking, GameBookingDto.class);
     }
@@ -154,12 +167,127 @@ public class GameBookingService {
             throw new BadRequestException("Booking already cancelled");
         }
 
+        notificationService.sendNotification(employeeId, "Cancel Booking Alert",
+                "Your " + gameBooking.getGame().getGameName() + " booking on " + gameBooking.getTimeSlot().getSlotDate() + " form " + gameBooking.getTimeSlot().getStartTime() + " to " + gameBooking.getTimeSlot().getEndTime() + " is cancelled",
+                NotificationType.GAME_BOOKING_CANCELLED);
+
+        List<BookingMember> bookingMembers = gameBookingMemberRepo.findByGameBooking_GameBookingId((gameBookingId));
+        for (BookingMember member: bookingMembers){
+            notificationService.sendNotification(member.getEmployee().getEmployeeId(), "Cancel Booking Alert",
+                    "Your " + gameBooking.getGame().getGameName() + " booking on " + gameBooking.getTimeSlot().getSlotDate() + " form " + gameBooking.getTimeSlot().getStartTime() + " to " + gameBooking.getTimeSlot().getEndTime() + " is cancelled",
+                    NotificationType.GAME_BOOKING_CANCELLED);
+        }
+
         gameBooking.setBookingStatus(BookingStatus.CANCELLED);
         gameBooking.setUpdatedBy(employeeId);
         gameBooking.setUpdatedAt(LocalDateTime.now());
-
         gameBookingRepo.save(gameBooking);
 
         return "Game cancelled successfully";
+    }
+
+    // Get upcoming booking for employee
+    public List<BookingDetailsDto> getMyUpcomingBookings() {
+
+        UUID userId = SecurityUtils.getCurrentUserId();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        UUID employeeId = employee.getEmployeeId();
+
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        List<BookingDetailsDto> response = new ArrayList<>();
+
+        // Get Booker from game booking
+        List<GameBooking> bookerBookings = gameBookingRepo.findByBooker_EmployeeIdAndTimeSlot_SlotDateGreaterThanEqual(employeeId, today);
+
+        for (GameBooking booking : bookerBookings) {
+            TimeSlot slot = booking.getTimeSlot();
+
+            // If slot date is in past then continue
+            if (slot.getSlotDate().isEqual(today) && slot.getStartTime().isBefore(now)) {
+                continue;
+            }
+
+            BookingDetailsDto bookingDetailsDto = modelMapper.map(booking, BookingDetailsDto.class);
+
+            bookingDetailsDto.setGameBookingId(booking.getGameBookingId());
+            bookingDetailsDto.setGameName(booking.getGame().getGameName());
+            bookingDetailsDto.setSlotDate(slot.getSlotDate());
+            bookingDetailsDto.setStartTime(slot.getStartTime());
+            bookingDetailsDto.setEndTime(slot.getEndTime());
+            response.add(bookingDetailsDto);
+        }
+
+        // Get Booking members
+        List<BookingMember> memberBookings = gameBookingMemberRepo.findByEmployee_EmployeeIdAndTimeSlot_SlotDateGreaterThanEqual(employeeId, today);
+
+        for (BookingMember member : memberBookings) {
+
+            GameBooking booking = member.getGameBooking();
+            TimeSlot slot = member.getTimeSlot();
+
+            // If booker is same in the member table
+            if (booking.getBooker().getEmployeeId().equals(employeeId)) {
+                continue;
+            }
+
+            // If slot date is in past then continue
+            if (slot.getSlotDate().isEqual(today) && slot.getStartTime().isBefore(now)) {
+                continue;
+            }
+
+            BookingDetailsDto bookingDetailsDto = modelMapper.map(booking, BookingDetailsDto.class);
+
+            bookingDetailsDto.setGameBookingId(booking.getGameBookingId());
+            bookingDetailsDto.setGameName(booking.getGame().getGameName());
+            bookingDetailsDto.setSlotDate(slot.getSlotDate());
+            bookingDetailsDto.setStartTime(slot.getStartTime());
+            bookingDetailsDto.setEndTime(slot.getEndTime());
+            response.add(bookingDetailsDto);
+        }
+
+        return response.stream().sorted(Comparator
+                        .comparing(BookingDetailsDto::getSlotDate)
+                        .thenComparing(BookingDetailsDto::getStartTime))
+                .toList();
+    }
+
+    // Get booking details based on id
+    public BookingDetailsDto getBookingDetail(UUID bookingId) {
+
+        GameBooking booking = gameBookingRepo.findById(bookingId).orElseThrow(() -> new IllegalArgumentException("Booking not found"));
+        TimeSlot slot = booking.getTimeSlot();
+
+        BookingDetailsDto bookingDetailsDto = modelMapper.map(booking, BookingDetailsDto.class);
+
+        bookingDetailsDto.setGameBookingId(booking.getGameBookingId());
+        bookingDetailsDto.setGameName(booking.getGame().getGameName());
+        bookingDetailsDto.setSlotDate(slot.getSlotDate());
+        bookingDetailsDto.setStartTime(slot.getStartTime());
+        bookingDetailsDto.setEndTime(slot.getEndTime());
+
+        List<BookingParticipantsDto> participants = new ArrayList<>();
+
+        participants.add(
+                new BookingParticipantsDto(
+                        booking.getBooker().getEmployeeId(),
+                        booking.getBooker().getName(),
+                        "BOOKER"
+                )
+        );
+
+        List<BookingMember> members =
+                gameBookingMemberRepo.findByGameBooking_GameBookingId(bookingId);
+
+        for (BookingMember member : members) {
+            participants.add(new BookingParticipantsDto(
+                            member.getEmployee().getEmployeeId(),
+                            member.getEmployee().getName(),
+                            "MEMBER")
+            );
+        }
+        bookingDetailsDto.setParticipants(participants);
+        return bookingDetailsDto;
     }
 }

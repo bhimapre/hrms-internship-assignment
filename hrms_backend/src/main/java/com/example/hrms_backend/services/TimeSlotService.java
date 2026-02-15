@@ -1,15 +1,10 @@
 package com.example.hrms_backend.services;
 
-import com.example.hrms_backend.entities.Employee;
-import com.example.hrms_backend.entities.Game;
-import com.example.hrms_backend.entities.GameTimeSlotConfig;
-import com.example.hrms_backend.entities.TimeSlot;
+import com.example.hrms_backend.dto.TimeSlotsDto;
+import com.example.hrms_backend.entities.*;
 import com.example.hrms_backend.exception.BadRequestException;
 import com.example.hrms_backend.exception.ResourceNotFoundException;
-import com.example.hrms_backend.repositories.EmployeeRepo;
-import com.example.hrms_backend.repositories.GameRepo;
-import com.example.hrms_backend.repositories.GameTimeSlotConfigRepo;
-import com.example.hrms_backend.repositories.TimeSlotRepo;
+import com.example.hrms_backend.repositories.*;
 import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -21,6 +16,7 @@ import java.security.Security;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -31,6 +27,7 @@ public class TimeSlotService {
     private final GameRepo gameRepo;
     private final TimeSlotRepo timeSlotRepo;
     private final EmployeeRepo employeeRepo;
+    private final GameBookingRepo gameBookingRepo;
 
     @Transactional
     public void generateSlots(UUID gameId, LocalDate fromDate, LocalDate toDate){
@@ -73,5 +70,9 @@ public class TimeSlotService {
                 current = current.plusMinutes(config.getSlotDuration());
             }
         }
+    }
+
+    public List<TimeSlotsDto> getAllGameTimeSlotsToday(UUID gameId){
+        List<TimeSlot> timeSlots = gameBookingRepo
     }
 }

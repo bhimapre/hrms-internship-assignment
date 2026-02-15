@@ -24,7 +24,7 @@ public class TravelExpenseDto {
     @Size(min = 2, max =  100, message = "Expense Name must be between 2 and 100 characters long")
     private String expenseName;
 
-    @NotBlank(message = "Expense date is required")
+    @NotNull(message = "Expense date is required")
     private LocalDate expenseDate;
 
     @Positive(message = "Amount must be positive value")
@@ -32,10 +32,10 @@ public class TravelExpenseDto {
     private BigDecimal expenseAmount;
 
     @Enumerated(EnumType.STRING)
-    private Enum<TravelExpenseCategory> expenseCategory;
+    private TravelExpenseCategory expenseCategory;
 
     @Enumerated(EnumType.STRING)
-    private Enum<ExpenseStatus> expenseStatus;
+    private ExpenseStatus expenseStatus;
 
     private String hrRemark;
     private UUID travelId;

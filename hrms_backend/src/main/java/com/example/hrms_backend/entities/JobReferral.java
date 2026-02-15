@@ -69,9 +69,6 @@ public class JobReferral {
     @Column(name = "status_change_time")
     private LocalDateTime statusChangeTime;
 
-    @Column(name = "job_referral_status_history")
-    private String jobReferralStatusHistory;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "email_status")
     private EmailStatus emailStatus;
