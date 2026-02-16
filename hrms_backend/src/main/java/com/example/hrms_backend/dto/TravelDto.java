@@ -30,7 +30,5 @@ public class TravelDto {
     @NotBlank(message = "Travel Details is required")
     @Size(min = 10, max =  500, message = "Travel Details must be between 10 and 500 characters long")
     private String travelDetails;
-
-    @NotNull(message = "Travel Status is required")
     private TravelStatus travelStatus;
 }
