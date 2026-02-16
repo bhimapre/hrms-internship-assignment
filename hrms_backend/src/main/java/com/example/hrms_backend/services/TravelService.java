@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.module.ResolutionException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -134,6 +135,10 @@ public class TravelService {
              throw new BadRequestException("Travel end date cannot be before start date");
          }
 
+         if(travelDto.getTravelDateFrom().isAfter(LocalDate.now()) && travelDto.getTravelDateTo().equals(LocalDate.now())){
+             throw new BadRequestException("Travel start and end date must be in future");
+         }
+
          travel.setTravelStatus(TravelStatus.CREATED);
          travel.setCreatedBy(employeeId);
          travel.setCreatedAt(LocalDateTime.now());
@@ -180,13 +185,17 @@ public class TravelService {
             throw new BadRequestException("Only HR can update travel");
         }
 
-        if(travel.getTravelStatus() == TravelStatus.COMPLETED){
-            throw new BadRequestException("Travel completed so you do not change it");
+        if(travel.getTravelStatus().equals(TravelStatus.COMPLETED) || travel.getTravelStatus().equals(TravelStatus.CANCELLED)){
+            throw new BadRequestException("Travel completed or Cancelled so you do not change it");
         }
 
         if(travelDto.getTravelDateTo().isBefore(travelDto.getTravelDateFrom()))
         {
             throw new BadRequestException("Travel end date cannot be before start date");
+        }
+
+        if(travelDto.getTravelDateFrom().isAfter(LocalDate.now()) && travelDto.getTravelDateTo().equals(LocalDate.now())){
+            throw new BadRequestException("Travel start and end date must be in future");
         }
 
         travel.setTravelTitle(travelDto.getTravelTitle());
@@ -199,5 +208,32 @@ public class TravelService {
         travel.setUpdatedBy(employeeId);
 
         return modelMapper.map(travelRepo.save(travel), TravelDto.class);
+    }
+
+    // Soft delete or canceled travel
+    public void cancelTravel(UUID travelId){
+        UUID userId = SecurityUtils.getCurrentUserId();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
+        UUID employeeId = employee.getEmployeeId();
+        String role = SecurityUtils.getRole();
+
+        if (!role.equals("HR")) {
+            throw new AccessDeniedException("You have no access of it");
+        }
+
+        Travel travel = travelRepo.findById(travelId).orElseThrow(() -> new ResourceNotFoundException(TRAVEL_NOT_FOUND));
+
+        if(!travel.getTravelStatus().equals(TravelStatus.CREATED)){
+            throw new BadRequestException("Travel is already complete or canceled");
+        }
+
+        if(travel.getTravelDateFrom().isBefore(LocalDate.now())){
+            throw new BadRequestException("Travel is already ongoing");
+        }
+
+        travel.setTravelStatus(TravelStatus.CANCELLED);
+        travel.setUpdatedBy(employeeId);
+        travel.setUpdatedAt(LocalDateTime.now());
+        travel = travelRepo.save(travel);
     }
 }

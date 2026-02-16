@@ -48,4 +48,12 @@ public class TravelController {
     public ResponseEntity<TravelDto> updateTravel(@PathVariable UUID travelId, @Valid @RequestBody TravelDto travelDto){
         return ResponseEntity.ok(travelService.updateTravel(travelId, travelDto));
     }
+
+    // Cancel travel
+    @PreAuthorize("hasAuthority('HR')")
+    @PostMapping("api/travel/cancel/{travelId}")
+    public ResponseEntity<Void> cancelTravel(@PathVariable UUID travelId){
+        travelService.cancelTravel(travelId);
+        return ResponseEntity.noContent().build();
+    }
 }

@@ -71,8 +71,4 @@ public class TimeSlotService {
             }
         }
     }
-
-    public List<TimeSlotsDto> getAllGameTimeSlotsToday(UUID gameId){
-        List<TimeSlot> timeSlots = gameBookingRepo
-    }
 }
