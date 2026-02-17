@@ -13,6 +13,8 @@ import com.example.hrms_backend.repositories.JobOpeningRepo;
 import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -69,25 +71,23 @@ public class JobOpeningService {
     }
 
     // Get all open job openings
-    public List<JobOpeningDto> getAllOpenJobs(){
-        List<JobOpening>  jobOpenings = jobOpeningRepo.findAllByJobOpeningStatus(JobOpeningStatus.OPEN);
-        return jobOpenings.stream()
-                .map(job -> modelMapper.map(job, JobOpeningDto.class))
-                .toList();
+    public Page<JobOpeningDto> getAllOpenJobs(Pageable pageable){
+        Page<JobOpening>  jobOpenings = jobOpeningRepo.findAllByJobOpeningStatus(JobOpeningStatus.OPEN, pageable);
+        return jobOpenings.map(job ->
+                modelMapper.map(job, JobOpeningDto.class));
     }
 
     // Get all job openings
-    public List<JobOpeningDto> getAllJobs()
+    public Page<JobOpeningDto> getAllJobs(Pageable pageable)
     {
         String role = SecurityUtils.getRole();
         if(!role.equals("HR")){
             throw new AccessDeniedException("You have no access of it");
         }
 
-        List<JobOpening> jobs = jobOpeningRepo.findAll();
-        return jobs.stream()
-                .map(job -> modelMapper.map(job, JobOpeningDto.class))
-                .toList();
+        Page<JobOpening> jobs = jobOpeningRepo.findAll(pageable);
+        return jobs.map(j ->
+                modelMapper.map(j, JobOpeningDto.class));
     }
 
     // Get open job opening by id

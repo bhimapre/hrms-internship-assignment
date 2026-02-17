@@ -80,7 +80,7 @@ public class JobReferralService {
         jobReferral.setEmployee(employee);
 
         try{
-            emailService.sendReferralEmail(jobReferral.getEmail(), jobReferral.getName(), jobOpening.getJobTitle(), employee.getName());
+            emailService.sendReferralEmail(jobReferral.getEmail(), jobReferral.getName(), jobOpening.getJobTitle(), employee.getName(), jobOpeningId, employeeId, jobReferral.getEmail(), jobReferral.getPhoneNumber(), jobReferral.getCvFileUrl());
             jobReferral.setEmailStatus(EmailStatus.SENT);
         }
         catch (Exception e){

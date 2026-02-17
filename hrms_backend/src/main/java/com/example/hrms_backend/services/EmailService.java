@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class EmailService {
     private final EmailTemplateUtil templateUtil;
 
     // Send email when employee referral
-    public void sendReferralEmail(String toEmail, String candidateName, String jobTitle, String referredBy) {
+    public void sendReferralEmail(String toEmail, String candidateName, String jobTitle, String referredBy, UUID jobOpeningId, UUID employeeId, String candidateEmail, String candidatePhoneNumber, String cvFileUrl) {
 
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
@@ -30,11 +31,19 @@ public class EmailService {
             helper.setTo(toEmail);
             helper.setSubject("Job Referral - " + jobTitle);
 
+            String jobOpeningIdToString = jobOpeningId.toString();
+            String employeeIdToString = employeeId.toString();
+
             String template = templateUtil.loadTemplate("job-referral-template.html");
 
             template = template.replace("{{candidateName}}", candidateName);
             template = template.replace("{{jobTitle}}", jobTitle);
             template = template.replace("{{referredBy}}", referredBy);
+            template = template.replace("{{jobOpeningId}}", jobOpeningIdToString);
+            template = template.replace("{{employeeId}}", employeeIdToString);
+            template = template.replace("{{candidateEmail}}", candidateEmail);
+            template = template.replace("{{candidatePhoneNumber}}", candidatePhoneNumber);
+            template = template.replace("{{cvFileUrl}}", cvFileUrl);
 
             helper.setText(template, true);
 
@@ -50,7 +59,7 @@ public class EmailService {
     }
 
     // Send email when employee share job
-    public void sendJobShareEmail(String toEmail, String jobTitle, String location, Integer experience, String sharedBy) {
+    public void sendJobShareEmail(String toEmail, String jobTitle, String location, Integer experience, String sharedBy, String jobDescription, String jobDescriptionFileUrl) {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper =
@@ -65,6 +74,8 @@ public class EmailService {
             template = template.replace("{{location}}", location);
             template = template.replace("{{experience}}", String.valueOf(experience));
             template = template.replace("{{sharedBy}}", sharedBy);
+            template = template.replace("{{jobDescription}}", jobDescription);
+            template = template.replace("{{jobDescriptionFileUrl}}", jobDescriptionFileUrl);
 
             helper.setText(template, true);
 
