@@ -1,16 +1,14 @@
 package com.example.hrms_backend.controllers;
 
 import com.example.hrms_backend.dto.JobOpeningDto;
-import com.example.hrms_backend.dto.TravelDocumentDto;
-import com.example.hrms_backend.entities.JobOpening;
 import com.example.hrms_backend.services.JobOpeningService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,16 +36,18 @@ public class JobOpeningController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/job-opening")
-    public ResponseEntity <List<JobOpeningDto>> allOpenJobs(){
-       List<JobOpeningDto> jobOpeningDto = jobOpeningService.getAllOpenJobs();
-       return new ResponseEntity<>(jobOpeningDto, HttpStatus.OK);
+    public ResponseEntity <Page<JobOpeningDto>> allOpenJobs(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "6") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<JobOpeningDto> jobOpeningDto = jobOpeningService.getAllOpenJobs(pageable);
+        return ResponseEntity.ok(jobOpeningDto);
     }
 
     @PreAuthorize("hasAuthority('HR')")
     @GetMapping("/api/hr/job-opening")
-    public ResponseEntity<List<JobOpeningDto>> allJobs(){
-        List<JobOpeningDto> jobOpenings = jobOpeningService.getAllJobs();
-        return new ResponseEntity<>(jobOpenings, HttpStatus.OK);
+    public ResponseEntity<Page<JobOpeningDto>> allJobs(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<JobOpeningDto> jobOpenings = jobOpeningService.getAllJobs(pageable);
+        return ResponseEntity.ok(jobOpenings);
     }
 
     @PreAuthorize("isAuthenticated()")

@@ -63,7 +63,8 @@ public class JobShareService {
             jobShareEmails.setCreatedBy(employeeId);
 
             try{
-                emailService.sendJobShareEmail(email, jobOpening.getJobTitle(), jobOpening.getJobLocation(), jobOpening.getExperience(), jobOpening.getJobDescription());
+                emailService.sendJobShareEmail(email, jobOpening.getJobTitle(), jobOpening.getJobLocation(), jobOpening.getExperience(),
+                        jobOpening.getJobDescription(), jobOpening.getJobDescription(), jobOpening.getPublicId());
 
                 jobShareEmails.setEmailStatus(EmailStatus.SENT);
             }

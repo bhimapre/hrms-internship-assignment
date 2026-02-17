@@ -6,20 +6,21 @@
 </head>
 <body style="font-family: Arial; background-color:#f4f4f4; padding:20px;">
 <div style="background:white; padding:20px; border-radius:8px;">
-    <h2 style="color:#2c3e50;">Job Referral</h2>
+    <h2 style="color:#2c3e50;">New Job Referral</h2>
 
-    <p>Hi <strong>{{candidateName}}</strong>,</p>
-
-    <p>You have been referred for the position of
-        <strong>{{jobTitle}}</strong>.</p>
+    <p><strong>Job Title:</strong> {{jobTitle}}</p>
+    <p><strong>Job Id:</strong>{{jobOpeningId}}</p>
 
     <p><strong>Referred By:</strong> {{referredBy}}</p>
+    <p><strong>Employee Id:</strong>{{employeeId}}</p>
 
-    <p>Our HR team will review your profile and contact you soon.</p>
-
+    <p><strong>Candidate Name:</strong>{{candidateName}}</p>
+    <p><strong>Candidate Email:</strong>{{candidateEmail}}</p>
+    <p><strong>Candidate Phone Number:</strong>{{candidatePhoneNumber}}</p>
+    <p><strong>CV File Link:</strong><a href={{cvFileUrl}}></a></p>
     <br>
 
-    <p><i>Regards,<br/>Roima Team</i></p>";
+    <p><i>Regards,<br/>Roima Team</i></p>
 </div>
 </body>
 </html>
