@@ -50,6 +50,6 @@ export const fetchJobOpeningByIdApi = async (jobOpeningId: string) => {
 
 // Soft Delete Job Opening
 export const deleteJobOpeningApi = async (jobOpeningId: string) => {
-    const res = await api.patch(`api/hr/job-opening/${jobOpeningId}`);
+    const res = await api.patch(`/api/hr/job-opening/${jobOpeningId}`);
     return res.data;
 }

@@ -16,6 +16,18 @@ import HRJobOpening from './pages/Job Opening/HRJobOpening.tsx';
 import JobOpenings from './pages/Job Opening/JobOpenings.tsx';
 import UpdateJobOpening from './pages/Job Opening/UpdateJobOpening.tsx';
 import UpdateJDFileJobOpening from './pages/Job Opening/UpdateJDFileJobOpening.tsx';
+import AddTravel from './pages/travel/AddTravel.tsx';
+import AllJobReferral from './pages/Job Opening/AllJobReferral.tsx';
+import UpdateJobReferral from './pages/Job Opening/UpdateJobReferral.tsx';
+import UpdateJobReferralCV from './pages/Job Opening/UpdateJobReferralCV.tsx';
+import TravelDetailsCard from './components/TravelDetailsCard.tsx';
+import { ThemeProvider } from '@emotion/react';
+import { theme } from './theme/theme.ts';
+import { CssBaseline } from '@mui/material';
+import TravelList from './pages/travel/TravelList.tsx';
+import TravelDetails from './pages/travel/TravelDetails.tsx';
+import EmployeeTravelExpenses from './pages/travel expense/EmployeeTravelExpense.tsx';
+import EmployeeTravelDocuments from './pages/travel documents/EmployeeTravelDocuments.tsx';
 
 
 const router = createBrowserRouter([
@@ -32,15 +44,11 @@ const router = createBrowserRouter([
     element: <AddJobOpening />
   },
   {
-    path: "/all-job-opening",
-    element: <JobOpenings />
-  },
-  {
-    path: "/share-job",
+    path: "/job-opening/share/:jobOpeningId",
     element: <ShareJob />
   },
   {
-    path: "/refer-job",
+    path: "/job-opening/referral/:jobOpeningId",
     element: <ReferJob />
   },
   {
@@ -52,8 +60,48 @@ const router = createBrowserRouter([
     element: <UpdateJobOpening />
   },
   {
-    path: "hr/job-opening/update-file/:jobOpeningId",
+    path: "/hr/job-opening/update-file/:jobOpeningId",
     element: <UpdateJDFileJobOpening />
+  },
+  {
+    path: "/hr/travel-opening/add",
+    element: <AddTravel />
+  },
+  {
+    path: "/hr/job-referrals",
+    element: <AllJobReferral />
+  },
+  {
+    path: "/job-referral/update/:jobReferralId",
+    element: <UpdateJobReferral />
+  },
+  {
+    path: "/job-referral/update-cv/:jobReferralId",
+    element: <UpdateJobReferralCV />
+  },
+  {
+    path: "/hr/job-opening",
+    element: <HRJobOpening />
+  },
+  {
+    path: "/travel/:travelId",
+    element: <TravelDetails />
+  },
+  {
+    path: "/travel-list",
+    element: <TravelList />
+  },
+  {
+    path: "/expense/travel/:travelId/employee/:employeeId",
+    element: <EmployeeTravelExpenses />
+  },
+  {
+    path: "/employee-document",
+    element: <EmployeeTravelDocuments />
+  },
+  {
+    path: "/travel/:travelId/employee/:employeeId",
+    element: <EmployeeTravelDocuments />
   }
 ]);
 
@@ -64,8 +112,11 @@ createRoot(document.getElementById('root')!).render(
     <ToastContainer position='top-right' autoClose={2000} theme='colored' />
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <RouterProvider router={router} />
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <RouterProvider router={router} />
           <App />
+        </ThemeProvider>
       </AuthProvider>
     </QueryClientProvider>
   </StrictMode>

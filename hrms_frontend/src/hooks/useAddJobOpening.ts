@@ -3,16 +3,16 @@ import { createJobOpeningApi } from "../api/JobOpeningApi"
 import { data } from "react-router-dom";
 import { toast } from "react-toastify";
 
-export const useAddJobopening = () =>{
+export const useAddJobopening = () => {
     return useMutation({
         mutationFn: (formData: FormData) =>
             createJobOpeningApi(formData),
 
-        onSuccess: () =>{
+        onSuccess: () => {
             toast.success("Job opening created successfully");
         },
 
-        onError: (err: any) =>{
+        onError: (err: any) => {
             toast.error(err?.res?.data?.message || "Something went wrong");
         }
     });

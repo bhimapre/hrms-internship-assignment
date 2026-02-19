@@ -38,7 +38,7 @@ public class JobReferral {
     private String email;
 
     @Column(name = "phone_Number", nullable = false)
-    @Pattern(regexp = "^[6-9]\\\\d{9}$", message = "Invalid phone number format")
+//    @Pattern(regexp = "^[6-9]\\\\d{9}$", message = "Invalid phone number format")
     @NotBlank(message = "Phone Number is required")
     @Size(min = 10, max =  10, message = "Phone Number size must be 10 digits")
     private String phoneNumber;

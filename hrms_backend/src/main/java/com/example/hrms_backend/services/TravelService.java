@@ -1,6 +1,7 @@
 package com.example.hrms_backend.services;
 
 import com.example.hrms_backend.dto.CreateTravelRequestDto;
+import com.example.hrms_backend.dto.EmployeeDto;
 import com.example.hrms_backend.dto.TravelDto;
 import com.example.hrms_backend.entities.Employee;
 import com.example.hrms_backend.entities.Travel;
@@ -15,6 +16,8 @@ import com.example.hrms_backend.repositories.TravelRepo;
 import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,23 +45,20 @@ public class TravelService {
     private static final String EMPLOYEE_NOT_FOUND = "Employee not found";
 
     // Get all travels
-    public List<TravelDto> getAllTravel(){
+    public Page<TravelDto> getAllTravel(Pageable pageable){
         String role = SecurityUtils.getRole();
         UUID userId = SecurityUtils.getCurrentUserId();
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
-        List<Travel> travels;
+        Page<Travel> travels;
 
         if (role.equals("HR")) {
-            travels = travelRepo.findAll();
+            travels = travelRepo.findAll(pageable);
         }
         else if (role.equals("EMPLOYEE")) {
-            travels = travelEmployeeRepo.findByEmployee_EmployeeId(employeeId)
-                    .stream()
-                    .map(TravelEmployee::getTravel)
-                    .distinct()
-                    .toList();
+            travels = travelEmployeeRepo.findByEmployee_EmployeeId(employeeId, pageable)
+                    .map(t ->  modelMapper.map(t, Travel.class));
         }
         else if (role.equals("MANAGER")) {
 
@@ -70,19 +70,15 @@ public class TravelService {
 
             teamEmployeeIds.add(employeeId);
 
-            travels = travelEmployeeRepo.findByEmployee_EmployeeIdIn(teamEmployeeIds)
-                    .stream()
-                    .map(TravelEmployee::getTravel)
-                    .distinct()
-                    .toList();
+            travels = travelEmployeeRepo.findByEmployee_EmployeeIdIn(teamEmployeeIds, pageable)
+                    .map(t -> modelMapper.map(t, Travel.class));
         }
         else {
             throw new ResourceNotFoundException("Invalid role");
         }
 
-        return travels.stream()
-                .map(t -> modelMapper.map(t, TravelDto.class))
-                .toList();
+        return travels
+                .map(t -> modelMapper.map(t, TravelDto.class));
     }
 
     // Get travel By ID
@@ -116,6 +112,7 @@ public class TravelService {
 
         return modelMapper.map(travel, TravelDto.class);
     }
+
 
     // create transaction for travel
     @Transactional
@@ -158,12 +155,12 @@ public class TravelService {
              travelEmployee.setCreatedBy(employeeId);
              travelEmployee = travelEmployeeRepo.save(travelEmployee);
 
-//             try{
-//                 emailService.sendTravelAssignEmployee(emp.getEmail(), travel.getTravelTitle(), travel.getTravelLocation(), travel.getTravelDateFrom(), travel.getTravelDateTo());
-//             }
-//             catch (Exception e){
-//                throw new RuntimeException("Failed to send email");
-//             }
+             try{
+                 emailService.sendTravelAssignEmployee(emp.getEmail(), travel.getTravelTitle(), travel.getTravelLocation(), travel.getTravelDateFrom(), travel.getTravelDateTo());
+             }
+             catch (Exception e){
+                throw new RuntimeException("Failed to send email");
+             }
              notificationService.sendNotification(emp.getEmployeeId(), travel.getTravelTitle(),
                      "You have assign new travel. Please check more details on travel section.",
                      NotificationType.TRAVEL_PLAN);
@@ -207,7 +204,9 @@ public class TravelService {
         travel.setUpdatedAt(LocalDateTime.now());
         travel.setUpdatedBy(employeeId);
 
-        return modelMapper.map(travelRepo.save(travel), TravelDto.class);
+        travel = travelRepo.save(travel);
+
+        return modelMapper.map(travel, TravelDto.class);
     }
 
     // Soft delete or canceled travel
@@ -236,4 +235,18 @@ public class TravelService {
         travel.setUpdatedAt(LocalDateTime.now());
         travel = travelRepo.save(travel);
     }
+
+    // Assign Travel Employees
+    public List<EmployeeDto> assignEmployee(UUID travelId){
+        Travel travel = travelRepo.findById(travelId).orElseThrow(() -> new ResourceNotFoundException(TRAVEL_NOT_FOUND));
+
+        List<Employee> employees = travelEmployeeRepo.findByTravel_TravelId(travelId)
+                .stream().map(TravelEmployee::getEmployee)
+                .toList();
+
+        return employees.stream()
+                .map(e -> modelMapper.map(e, EmployeeDto.class))
+                .toList();
+    }
 }
+

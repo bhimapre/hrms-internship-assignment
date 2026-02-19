@@ -4,12 +4,14 @@ import com.example.hrms_backend.utils.EmailTemplateUtil;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
 @Service
@@ -92,9 +94,9 @@ public class EmailService {
     // Send email when new travel created
     public void sendTravelAssignEmployee(String toEmail, String travelTitle, String travelLocation, LocalDate travelDateFrom, LocalDate travelDateTo){
         try {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            String formateStratDate = dateFormat.format(travelDateFrom);
-            String formateEndDate = dateFormat.format(travelDateTo);
+            DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String formateStratDate = travelDateFrom.format(format);
+            String formateEndDate = travelDateTo.format(format);
 
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
@@ -113,7 +115,7 @@ public class EmailService {
             mailSender.send(mimeMessage);
         }
         catch (Exception e){
-            throw new RuntimeException("Failed to send email");
+            throw new RuntimeException("Failed to send email", e);
         }
     }
 }

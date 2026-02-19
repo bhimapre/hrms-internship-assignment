@@ -16,6 +16,8 @@ import com.example.hrms_backend.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.security.access.AccessDeniedException;
@@ -39,6 +41,7 @@ public class TravelDocumentService {
     private final TravelEmployeeRepo travelEmployeeRepo;
     private final Cloudinary cloudinary;
     private static final String EMPLOYEE_NOT_FOUND = "Employee not found";
+    private static final String TRAVEL_DOCUMENT_NOT_FOUND = "Travel document not found";
 
     // Upload travel documents
     public String uploadTravelDocuments(UUID travelId, MultipartFile file, TravelDocumentDto documentDto) throws IOException {
@@ -80,7 +83,7 @@ public class TravelDocumentService {
         travelDocument.setOwnerType(SecurityUtils.getRole());
         travelDocument.setUploadedBy(employeeId);
         travelDocument.setTravel(travel);
-//        travelDocument.setEmployee(employee);
+        travelDocument.setEmployee(employee);
         travelDocument.setCreatedAt(LocalDateTime.now());
         travelDocument.setCreatedBy(employeeId);
 
@@ -89,16 +92,16 @@ public class TravelDocumentService {
     }
 
     // Get all documents from the all travels
-    public List<TravelDocumentDto> getAllTravelDocuments() {
+    public Page<TravelDocumentDto> getAllTravelDocuments(Pageable pageable) {
 
         String role = SecurityUtils.getRole();
         UUID userId = SecurityUtils.getCurrentUserId();
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
-        List<TravelDocument> documents;
+        Page<TravelDocument> documents;
         if (role.equals("HR")) {
-            documents = documentRepo.findAll();
+            documents = documentRepo.findAll(pageable);
         }
         else if (role.equals("EMPLOYEE") || role.equals("MANAGER")) {
             List<Employee> team = employeeRepo.findByManager_EmployeeId(employeeId);
@@ -108,26 +111,23 @@ public class TravelDocumentService {
                     .map(Employee::getEmployeeId)
                     .toList();
 
-            List<UUID> travelIds = travelEmployeeRepo.findByEmployee_EmployeeIdIn(employeeIds)
+            List<UUID> travelIds = travelEmployeeRepo.findByEmployee_EmployeeIdIn(employeeIds, pageable)
                     .stream().map(e -> e.getTravel().getTravelId())
                     .distinct().toList();
 
-            documents = documentRepo.findByTravel_TravelIdIn(travelIds);
-
+            documents = documentRepo.findByTravel_TravelIdIn(travelIds, pageable);
         }
         else {
             throw new BadRequestException("Invalid role");
         }
 
-        return documents.stream()
-                .map(travel -> modelMapper.map(travel, TravelDocumentDto.class))
-                .toList();
+        return documents.map(travel -> modelMapper.map(travel, TravelDocumentDto.class));
     }
 
     // Get travel documents By ID
     public TravelDocumentDto getTravelDocumentsById(UUID travelDocumentId) {
 
-        TravelDocument document = documentRepo.findById(travelDocumentId).orElseThrow(() -> new ResolutionException("Travel not found"));
+        TravelDocument document = documentRepo.findById(travelDocumentId).orElseThrow(() -> new ResolutionException(TRAVEL_DOCUMENT_NOT_FOUND));
         String role = SecurityUtils.getRole();
         UUID userId = SecurityUtils.getCurrentUserId();
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
@@ -159,6 +159,28 @@ public class TravelDocumentService {
         return modelMapper.map(document, TravelDocumentDto.class);
     }
 
+    // Get Travel Document Uploaded by HR
+    public List<TravelDocumentDto> getDocumentsByTravelIdAndHR(UUID travelId){
+        List<TravelDocument> documents = documentRepo.findByTravel_TravelIdAndOwnerType(travelId, "HR");
+        return documents.stream()
+                .map(d -> modelMapper.map(d, TravelDocumentDto.class))
+                .toList();
+    }
+
+    // Get Travel Document By Travel ID
+    public Page<TravelDocumentDto> getDocumentsByTravelId(Pageable pageable, UUID travelId){
+        Page<TravelDocument> travelDocuments = documentRepo.findByTravel_TravelId(travelId, pageable);
+        return travelDocuments.map(td -> modelMapper.map(td, TravelDocumentDto.class));
+    }
+
+    // Get Travel Document By Employee ID
+    public List<TravelDocumentDto> getDocumentsByTravelIdAndExpenseId(UUID travelId, UUID employeeId){
+        List<TravelDocument> documents = documentRepo.findByTravel_TravelIdAndEmployee_EmployeeId(travelId,employeeId);
+        return documents.stream()
+                .map(d -> modelMapper.map(d, TravelDocumentDto.class))
+                .toList();
+    }
+
     // Update travel document details
     public TravelDocumentDto updateTravelDocumentDetails(UUID documentId, TravelDocumentDto documentDto){
         UUID userId = SecurityUtils.getCurrentUserId();
@@ -166,9 +188,8 @@ public class TravelDocumentService {
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
-        TravelDocument document = documentRepo.findById(documentId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Travel document not found"));
+        TravelDocument document = documentRepo.findById(documentId).orElseThrow(() ->
+                        new ResourceNotFoundException(TRAVEL_DOCUMENT_NOT_FOUND));
 
         if (!role.equals("HR")) {
             if (!document.getUploadedBy().equals(employeeId)) {
@@ -195,7 +216,7 @@ public class TravelDocumentService {
         UUID employeeId = employee.getEmployeeId();
 
         TravelDocument document = documentRepo.findById(documentId).orElseThrow(() ->
-                        new ResourceNotFoundException("Travel document not found"));
+                        new ResourceNotFoundException(TRAVEL_DOCUMENT_NOT_FOUND));
 
         if (!"HR".equals(role)) {
             if(!document.getUploadedBy().equals(employeeId)) {

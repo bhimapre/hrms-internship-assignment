@@ -7,6 +7,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -38,15 +41,17 @@ public class JobReferralController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/job-referral")
-    public ResponseEntity<List<JobReferralDto>> getAllReferralByUser(){
-        List<JobReferralDto> referrals = jobReferralService.getAllJobReferralsBasedOnUser();
-        return new ResponseEntity<>(referrals, HttpStatus.OK);
+    public ResponseEntity<Page<JobReferralDto>> getAllReferralByUser(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<JobReferralDto> referrals = jobReferralService.getAllJobReferralsBasedOnUser(pageable);
+        return ResponseEntity.ok(referrals);
     }
 
     @PreAuthorize("hasAuthority('HR')")
     @GetMapping("/api/hr/job-referral")
-    public ResponseEntity<List<JobReferralDto>> getAllReferralByHR(){
-        List<JobReferralDto> referrals = jobReferralService.getAllJobReferralsForHR();
+    public ResponseEntity<Page<JobReferralDto>> getAllReferralByHR(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<JobReferralDto> referrals = jobReferralService.getAllJobReferralsForHR(pageable);
         return new ResponseEntity<>(referrals, HttpStatus.OK);
     }
 

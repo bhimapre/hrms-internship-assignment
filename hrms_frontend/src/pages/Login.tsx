@@ -24,7 +24,7 @@ const Login = () => {
   const onSubmit = (data: LoginForm) => {
     loginMuatation.mutate(data, {
       onSuccess: (respose) => {
-        login(respose.accessToken);
+        login(respose.accessToken, respose.role);
         navigate("/dashboard");
       },
     });

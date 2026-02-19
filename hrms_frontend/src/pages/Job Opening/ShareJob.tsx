@@ -1,36 +1,128 @@
+import { Sidebar } from 'lucide-react';
 import React from 'react'
-import { useForm } from 'react-hook-form'
+import { useFieldArray, useForm } from 'react-hook-form'
+import Navbar from '../../components/Navbar';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useCreateJobShare } from '../../hooks/jobShare/useCreateJobShare';
+import { toast } from 'react-toastify';
+import Loading from '../../components/Loading';
 
 export interface ShareEmails {
-    email: string;
-}
-
-export interface ListShareEmails {
-    emails: ShareEmails[];
+    emails: { email: string }[];
 }
 
 const ShareJob = () => {
 
-    const { register, formState: { errors } } = useForm<ListShareEmails>();
+    const { jobOpeningId } = useParams<{ jobOpeningId: string }>();
+    const navigate = useNavigate();
+
+    const { mutate: shareJob, isPending } = useCreateJobShare();
+
+    const {
+        register,
+        control,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<ShareEmails>({
+        defaultValues: {
+            emails: [{ email: "" }],
+        },
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "emails",
+    });
+
+    const onSubmit = (data: ShareEmails) => {
+        if (!jobOpeningId) {
+            toast.error("Job opening not found");
+            return;
+        }
+
+        const emailList = data.emails
+            .map((e) => e.email.trim())
+            .filter(Boolean);
+
+        if (emailList.length === 0) {
+            toast.error("At least one email addres is required");
+            return;
+        }
+
+        shareJob({
+            jobOpening: jobOpeningId,
+            jobShareEmailIds: emailList,
+        });
+    };
+
+    if (isPending) {
+        return <Loading />
+    }
 
     return (
         <>
-            <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
-                <div className="text-center mt-8 mb-8">
-                    <h1 className="text-4xl font-bold text-center text-white mb-4">Add Job Opening</h1>
+            <div className="flex flex-col h-screen bg-neutral-950 text-white">
+                <Navbar />
+
+                <div className="flex flex-1 overflow-hidden">
+                    <Sidebar />
+
+                    <main className="flex-1 overflow-y-auto p-6 max-w-3xl mx-auto">
+                        <h1 className="text-3xl font-bold text-center mb-6">Share Job Opening</h1>
+
+                        <form
+                            onSubmit={handleSubmit(onSubmit)}
+                            className="bg-neutral-900 p-6 rounded-md border border-neutral-700 space-y-4">
+                            {fields.map((field, index) => (
+                                <div key={field.id} className="flex gap-2">
+                                    <input
+                                        type="email"
+                                        placeholder="Enter email address"
+                                        {...register(`emails.${index}.email`, {
+                                            required: "Email is required",
+                                        })}
+                                        className="flex-1 rounded px-3 py-2 text-white" />
+
+                                    {fields.length > 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => remove(index)}
+                                            className="bg-red-600 px-3 rounded text-white">
+                                            Cancel
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+
+                            {errors.emails && (
+                                <p className="text-red-400 text-sm">At least one email is required</p>
+                            )}
+
+                            <button
+                                type="button"
+                                onClick={() => append({ email: "" })}
+                                className="text-purple-400 text-sm">
+                                + Add another email
+                            </button>
+
+                            <div className="flex justify-between pt-4">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate(-1)}
+                                    className="px-4 py-2 rounded bg-neutral-700">
+                                    Cancel
+                                </button>
+
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2 rounded bg-purple-700 hover:bg-purple-800">
+                                    Submit
+                                </button>
+                            </div>
+                        </form>
+                    </main>
                 </div>
-                <form className="bg-neutral-800 shadow-md rounded px-8 pt-6 pb-8 mb-4 border-2 border-solid border-neutral-700">
-                    <div className="mb-4">
-                        <label className="block text-white text-sm font-bold mb-2"> Email Id </label>
-                        <input {...register("emails", { required: true })} className="border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline" placeholder="Enter multiple Email Id use ',' for that" />
-                    </div>
-                    {errors.emails && (<p className="text-rose-500 text-sm mt-1">At least one Email is required</p>)}
-                    <div className='flex justify-between'>
-                        <button className="text-white bg-purple-800 hover:bg-purple-600 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-base text-sm px-4 py-2 text-center">Cancel</button>
-                        <button type="submit" className="text-white bg-purple-800 hover:bg-purple-600 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-base text-sm px-4 py-2 text-center">Submit</button>
-                    </div>
-                </form>
-            </main>
+            </div>
         </>
     )
 }

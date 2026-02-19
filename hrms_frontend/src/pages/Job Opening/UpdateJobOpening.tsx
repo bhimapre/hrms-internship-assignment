@@ -15,7 +15,7 @@ const UpdateJobOpening = () => {
 
     const { mutate: updateJob } = useUpdateJobOpening();
 
-    const{data: jobData, isLoading} = useGetJobOpeningByIdHr(jobOpeningId);
+    const { data: jobData, isLoading } = useGetJobOpeningByIdHr(jobOpeningId);
 
     const { register, formState: { errors }, handleSubmit, reset } = useForm<JobOpeningInterface>();
 
@@ -24,16 +24,16 @@ const UpdateJobOpening = () => {
             return <div> job Opening Id not found </div>
         }
 
-        updateJob({ jobOpeningId, data});
+        updateJob({ jobOpeningId, data });
     }
 
     useEffect(() => {
-        if(jobData){
+        if (jobData) {
             reset(jobData);
         }
     }, [jobData, reset]);
 
-    if(isLoading){
+    if (isLoading) {
         return <Loading />
     }
 

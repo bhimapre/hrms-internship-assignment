@@ -35,6 +35,14 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeDto);
     }
 
+    // Get all active employee
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/api/employee/active")
+    public ResponseEntity<List<EmployeeDto>> getAllActiveEmployee(){
+        List<EmployeeDto> employeeDtoList = employeeService.getAllActiveEmployee();
+        return ResponseEntity.ok(employeeDtoList);
+    }
+
     // Add employee by HR
     @PreAuthorize("hasAuthority('HR')")
     @PostMapping("/api/hr/add-employee")

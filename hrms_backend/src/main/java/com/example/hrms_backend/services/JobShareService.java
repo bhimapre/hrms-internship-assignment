@@ -46,6 +46,7 @@ public class JobShareService {
             throw new BadRequestException("At least one email id is required");
         }
 
+        jobShare.setEmployee(employee);
         jobShare.setCreatedBy(employeeId);
         jobShare.setCreatedAt(LocalDateTime.now());
 
@@ -64,7 +65,7 @@ public class JobShareService {
 
             try{
                 emailService.sendJobShareEmail(email, jobOpening.getJobTitle(), jobOpening.getJobLocation(), jobOpening.getExperience(),
-                        jobOpening.getJobDescription(), jobOpening.getJobDescription(), jobOpening.getPublicId());
+                        employee.getName(),jobOpening.getJobDescription(), jobOpening.getJobDescriptionFileUrl());
 
                 jobShareEmails.setEmailStatus(EmailStatus.SENT);
             }

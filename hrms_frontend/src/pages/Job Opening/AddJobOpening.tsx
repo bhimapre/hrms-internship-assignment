@@ -21,21 +21,21 @@ const AddJobOpening = () => {
   const { register, formState: { errors }, handleSubmit } = useForm<JobOpeningInterface>();
 
   // Custom Hook Calling 
-  const {mutate, isPending} = useAddJobopening();
+  const { mutate, isPending } = useAddJobopening();
 
   // On Submit Form
   const onSubmit = (data: JobOpeningInterface) => {
     const formData = new FormData();
     const file = data.file[0];
 
-    const{file: _, ...jobOpeningDto} = data;
+    const { file: _, ...jobOpeningDto } = data;
 
     // Add Data into formData
     formData.append(
       "data",
       new Blob(
         [JSON.stringify(jobOpeningDto)],
-        {type : "application/json"}
+        { type: "application/json" }
       )
     );
 
@@ -45,7 +45,7 @@ const AddJobOpening = () => {
   }
 
   // Loading
-  if(isPending){
+  if (isPending) {
     <Loading />
   }
 
@@ -57,7 +57,7 @@ const AddJobOpening = () => {
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <Sidebar />
+        {/* <Sidebar /> */}
 
         {/* Page Content */}
         <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
@@ -152,7 +152,7 @@ const AddJobOpening = () => {
             {/* Submit */}
             <div className="md:col-span-2">
               <button
-                disabled = {isPending}
+                disabled={isPending}
                 type="submit"
                 className="w-full p-2 rounded font-medium transition bg-purple-600 hover:bg-purple-500">
                 + Add Job Opening

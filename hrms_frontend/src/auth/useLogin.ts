@@ -7,8 +7,11 @@ interface LoginRequest{
     password: string;
 }
 
+type UserRole = "HR" | "MANAGER" | "EMPLOYEE"
+
 interface LoginResponse{
     accessToken: string;
+    role: UserRole;
 }
 
 export const useLogin = () => {

@@ -53,6 +53,14 @@ public class EmployeeService {
         return modelMapper.map(employee, EmployeeDto.class);
     }
 
+    // Get Active Employee
+    public List<EmployeeDto> getAllActiveEmployee(){
+        List<Employee> employees = employeeRepo.findByIsActive(true);
+        return employees.stream()
+                .map(emp -> modelMapper.map(emp, EmployeeDto.class))
+                .toList();
+    }
+
     // Add Employee
     public EmployeeDto createEmployee(EmployeeDto employeeDto){
         Employee employee = modelMapper.map(employeeDto, Employee.class);

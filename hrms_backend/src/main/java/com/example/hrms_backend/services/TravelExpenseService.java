@@ -16,6 +16,8 @@ import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -37,15 +39,16 @@ public class TravelExpenseService {
     private final TravelEmployeeRepo travelEmployeeRepo;
     private final ModelMapper modelMapper;
     private final NotificationService notificationService;
+    private static final String EMPLOYEE_NOT_FOUND = "Employee not found";
 
     // Add Expense
-    public TravelExpenseDto addExpense(TravelExpenseDto travelExpenseDto){
+    public TravelExpenseDto addExpense(UUID travelId ,TravelExpenseDto travelExpenseDto){
 
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
-        Travel travel = travelRepo.findById(travelExpenseDto.getTravelId()).orElseThrow(() -> new ResourceNotFoundException("Travel not found"));
+        Travel travel = travelRepo.findById(travelId).orElseThrow(() -> new ResourceNotFoundException("Travel not found"));
 
         if(travel.getTravelStatus().equals(TravelStatus.CANCELLED)){
             throw new BadRequestException("Travel is cancelled");
@@ -80,13 +83,13 @@ public class TravelExpenseService {
     public void submitExpense(UUID expenseId){
 
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         TravelExpense expense = travelExpenseRepo.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
         if(!employeeId.equals(expense.getEmployee().getEmployeeId())){
-            throw new BadRequestException("Employee not found");
+            throw new BadRequestException(EMPLOYEE_NOT_FOUND);
         }
 
         if(!expense.getExpenseStatus().equals(ExpenseStatus.DRAFT)){
@@ -112,7 +115,7 @@ public class TravelExpenseService {
     public void approveExpense(UUID expenseId, String remark){
 
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         TravelExpense expense = travelExpenseRepo.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
@@ -139,7 +142,7 @@ public class TravelExpenseService {
     public void rejectExpense(UUID expenseId, String remark){
 
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         TravelExpense expense = travelExpenseRepo.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
@@ -164,7 +167,7 @@ public class TravelExpenseService {
     public List<TravelExpenseDto> getAllExpense(){
 
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
         List<TravelExpense> travelExpenses;
 
@@ -201,7 +204,7 @@ public class TravelExpenseService {
     public TravelExpenseDto getTravelExpenseById(UUID expenseId) {
 
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         TravelExpense expense = travelExpenseRepo.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
@@ -235,11 +238,19 @@ public class TravelExpenseService {
         return modelMapper.map(expense, TravelExpenseDto.class);
     }
 
+    // Get all travel expense based on employee
+    public List<TravelExpenseDto> getAllExpenseByTravelIdAndEmployeeId(UUID travelId, UUID employeeId){
+        List<TravelExpense> expenses = travelExpenseRepo.findByTravel_TravelIdAndEmployee_EmployeeId(travelId, employeeId);
+        return expenses.stream()
+                .map(e -> modelMapper.map(e, TravelExpenseDto.class))
+                .toList();
+    }
+
     // Update travel expense details
     public TravelExpenseDto updateTravelExpenseDetails(UUID expenseId, TravelExpenseDto expenseDto){
         UUID userId = SecurityUtils.getCurrentUserId();
         String role = SecurityUtils.getRole();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
         TravelExpense expense = travelExpenseRepo.findById(expenseId).orElseThrow(() -> new ResourceNotFoundException("No travel expense found"));
@@ -248,6 +259,11 @@ public class TravelExpenseService {
                 throw new AccessDeniedException("You have no access of it");
             }
         }
+        expense.setExpenseName(expenseDto.getExpenseName());
+        expense.setExpenseDate(expenseDto.getExpenseDate());
+        expense.setExpenseAmount(expenseDto.getExpenseAmount());
+        expense.setExpenseCategory(expenseDto.getExpenseCategory());
+        expense.setExpenseStatus(expenseDto.getExpenseStatus());
         expense.setUpdatedBy(employeeId);
         expense.setUpdatedAt(LocalDateTime.now());
         travelExpenseRepo.save(expense);
@@ -277,5 +293,26 @@ public class TravelExpenseService {
         expense.setUpdatedBy(employeeId);
 
         travelExpenseRepo.save(expense);
+    }
+
+    // Filter Travel Expense
+    public Page<TravelExpenseDto> getHrExpense(String employeeName,
+                                               String travelTitle,
+                                               ExpenseStatus expenseStatus,
+                                               LocalDate fromDate,
+                                               LocalDate toDate,
+                                               Pageable pageable)
+    {
+        Page<TravelExpense> expense = travelExpenseRepo.searchHrExpense(employeeName, travelTitle, expenseStatus, fromDate, toDate, pageable);
+        return expense.map(e ->
+                modelMapper.map(e, TravelExpenseDto.class));
+    }
+
+    // Get travel expense based on travel ID
+    public List<TravelExpenseDto> getTravelExpenseByTravelId(UUID travelId){
+        List<TravelExpense> expense = travelExpenseRepo.findByTravel_TravelId(travelId);
+        return expense.stream()
+                .map(t -> modelMapper.map(t, TravelExpenseDto.class))
+                .toList();
     }
 }

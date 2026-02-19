@@ -12,8 +12,6 @@ public class JobShareRequestDto {
 
     @NotNull(message = "JobOpening is required")
     private UUID jobOpening;
-
-    @NotNull(message = "Employee is required")
     private UUID employee;
 
     private List<String> jobShareEmailIds;

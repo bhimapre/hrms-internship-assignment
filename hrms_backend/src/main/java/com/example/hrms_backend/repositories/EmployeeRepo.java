@@ -14,4 +14,6 @@ public interface EmployeeRepo extends JpaRepository<Employee, UUID> {
     List<Employee> findByManager_EmployeeId(UUID managerId);
 
     Optional<Employee> findByUser_UserId(UUID userId);
+
+    List<Employee> findByIsActive(boolean isActive);
 }

@@ -21,6 +21,8 @@ import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,25 +100,23 @@ public class JobReferralService {
     }
 
     // Get all job referrals
-    public List<JobReferralDto> getAllJobReferralsBasedOnUser(){
+    public Page<JobReferralDto> getAllJobReferralsBasedOnUser(Pageable pageable){
 
         UUID userId = SecurityUtils.getCurrentUserId();
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
 
-        List<JobReferral> jobReferrals = jobReferralRepo.findByCreatedBy(employeeId);
-        return jobReferrals.stream()
-                .map(ref ->modelMapper.map(ref, JobReferralDto.class))
-                .toList();
+        Page<JobReferral> jobReferrals = jobReferralRepo.findByCreatedBy(employeeId, pageable);
+        return jobReferrals.map(job ->
+                modelMapper.map(job, JobReferralDto.class));
     }
 
     // Get all job referrals
-    public List<JobReferralDto> getAllJobReferralsForHR(){
+    public Page<JobReferralDto> getAllJobReferralsForHR(Pageable pageable){
 
-        List<JobReferral> jobReferrals = jobReferralRepo.findAll();
-        return jobReferrals.stream()
-                .map(ref ->modelMapper.map(ref, JobReferralDto.class))
-                .toList();
+        Page<JobReferral> jobReferrals = jobReferralRepo.findAll(pageable);
+        return jobReferrals.map(job ->
+                modelMapper.map(job, JobReferralDto.class));
     }
 
     // Get job referrals by id

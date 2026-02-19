@@ -1,5 +1,6 @@
 import React from 'react'
 import type { JobOpeningInterface } from '../pages/Job Opening/AddJobOpening'
+import { useNavigate } from 'react-router-dom';
 
 export interface GetAllJobOpening {
     jobOpeningId: string;
@@ -16,6 +17,8 @@ interface Props {
 }
 
 const JobOpeningCard = ({ job }: Props) => {
+
+    const navigate = useNavigate();
 
     return (
         <>
@@ -38,8 +41,8 @@ const JobOpeningCard = ({ job }: Props) => {
                 </div>
 
                 <div className="px-6 pb-4 pt-2 flex justify-between">
-                    <button className="bg-purple-700 hover:bg-purple-800 text-white text-sm px-4 py-1 rounded-full">Share Job</button>
-                    <button className="bg-purple-700 hover:bg-purple-800 text-white text-sm px-4 py-1 rounded-full">Refer Job</button>
+                    <button onClick={() => navigate(`/job-opening/share/${job.jobOpeningId}`)} className="bg-purple-700 hover:bg-purple-800 text-white text-sm px-4 py-1 rounded-full">Share Job</button>
+                    <button onClick={() => navigate(`/job-opening/referral/${job.jobOpeningId}`)} className="bg-purple-700 hover:bg-purple-800 text-white text-sm px-4 py-1 rounded-full">Refer Job</button>
                 </div>
             </div>
         </>

@@ -1,5 +1,6 @@
 package com.example.hrms_backend.dto;
 
+import com.example.hrms_backend.entities.TravelEmployee;
 import com.example.hrms_backend.entities.enums.TravelStatus;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data

@@ -3,7 +3,7 @@ import { Eye, Edit, Trash2, File } from "lucide-react"
 import { useNavigate } from 'react-router-dom'
 import { useHrAllJobOpenings } from '../../hooks/useHrAllJobOpenings'
 import Loading from '../../components/Loading'
-import type { GetJobOpening } from '../../types/JobOpening'
+import type { GetJobOpening, PageResponse } from '../../types/JobOpening'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useDeleteJobOpening } from '../../hooks/useDeleteJobOpening'
@@ -22,6 +22,11 @@ const HRJobOpening = () => {
     // Handle Delete
     const { handleDelete } = useDeleteJobOpening();
 
+    const jobs = data?.content ?? [];
+    const isFirst = data?.first ?? true;
+    const isLast = data?.last ?? true;
+    const totalPages = data?.totalPages ?? 0;
+
     // Loading
     if (isLoading) {
         return <Loading />
@@ -32,6 +37,8 @@ const HRJobOpening = () => {
         return <div>Failed to fetch data</div>
     }
 
+    console.log(jobs);
+
     return (
         <div className="flex flex-col h-screen bg-neutral-950 text-neutral-100">
             {/* Navbar */}
@@ -40,7 +47,7 @@ const HRJobOpening = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                <Sidebar />
+                {/* <Sidebar /> */}
 
                 {/* Main Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
@@ -60,17 +67,17 @@ const HRJobOpening = () => {
 
                         {/* Card View Data */}
                         <div className="space-y-2">
-                            {data?.content.map((job: GetJobOpening) => (
+                            {jobs.map((job: GetJobOpening) => (
                                 <div
                                     key={job.jobOpeningId}
                                     className="bg-neutral-900 border border-neutral-700 rounded-md p-3 sm:p-4 shadow-sm hover:shadow-md transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
                                     <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-1 flex-1 min-w-0">
-                                            <p className="break-all"><span className="font-medium text-purple-300">Job Opening Id:</span> Job Opening Id</p>
-                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Title:</span> Job Title</p>
-                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">No of Openings:</span> No Of Opening</p>
-                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Location:</span> Location</p>
-                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Experience:</span> Experinece</p>
+                                            <p className="break-all"><span className="font-medium text-purple-300">Job Opening Id:</span>{job.jobOpeningId}</p>
+                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Title:</span>{job.jobTitle}</p>
+                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">No of Openings:</span>{job.noOfOpening}</p>
+                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Location:</span>{job.jobLocation}</p>
+                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Experience:</span>{job.experience}</p>
                                         </div>
                                     </div>
 
@@ -107,10 +114,10 @@ const HRJobOpening = () => {
                     {/* Pagination */}
                     <div className="flex items-center justify-center gap-4 mt-10">
                         <button
-                            disabled={data?.first}
+                            disabled={isFirst}
                             onClick={() => setPage((p) => p - 1)}
                             className={`px-4 py-1 rounded-full text-sm
-                            ${data?.first
+                            ${isFirst
                                     ? "bg-neutral-700 text-neutral-400 cursor-not-allowed"
                                     : "bg-purple-700 hover:bg-purple-800 text-white"
                                 }`}>
@@ -120,15 +127,15 @@ const HRJobOpening = () => {
                         <span className="text-neutral-300 text-sm">
                             Page <span className="text-white font-semibold">{page + 1}</span> of{" "}
                             <span className="text-white font-semibold">
-                                {data?.totalPages}
+                                {totalPages}
                             </span>
                         </span>
 
                         <button
-                            disabled={data?.last}
+                            disabled={isLast}
                             onClick={() => setPage((p) => p + 1)}
                             className={`px-4 py-1 rounded-full text-sm
-                            ${data?.last
+                            ${isLast
                                     ? "bg-neutral-700 text-neutral-400 cursor-not-allowed"
                                     : "bg-purple-700 hover:bg-purple-800 text-white"
                                 }`}>
