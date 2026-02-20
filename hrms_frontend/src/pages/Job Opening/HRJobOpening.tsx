@@ -3,29 +3,28 @@ import { Eye, Edit, Trash2, File } from "lucide-react"
 import { useNavigate } from 'react-router-dom'
 import { useHrAllJobOpenings } from '../../hooks/useHrAllJobOpenings'
 import Loading from '../../components/Loading'
-import type { GetJobOpening, PageResponse } from '../../types/JobOpening'
 import Navbar from '../../components/Navbar'
-import Sidebar from '../../components/Sidebar'
 import { useDeleteJobOpening } from '../../hooks/useDeleteJobOpening'
+import Sidebar from '../../components/Sidebar'
 
 const HRJobOpening = () => {
 
     // Navigate
     const navigate = useNavigate();
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     // Pagination State
     const [page, setPage] = useState(0);
 
     // Fetch Data
-    const { data, isLoading, isError } = useHrAllJobOpenings(page, 6);
+    const { data: jobs, isLoading, isError } = useHrAllJobOpenings(page, 6);
 
     // Handle Delete
     const { handleDelete } = useDeleteJobOpening();
 
-    const jobs = data?.content ?? [];
-    const isFirst = data?.first ?? true;
-    const isLast = data?.last ?? true;
-    const totalPages = data?.totalPages ?? 0;
+    const isFirst = jobs?.first ?? true;
+    const isLast = jobs?.last ?? true;
+    const totalPages = jobs?.totalPages ?? 0;
 
     // Loading
     if (isLoading) {
@@ -37,8 +36,6 @@ const HRJobOpening = () => {
         return <div>Failed to fetch data</div>
     }
 
-    console.log(jobs);
-
     return (
         <div className="flex flex-col h-screen bg-neutral-950 text-neutral-100">
             {/* Navbar */}
@@ -47,7 +44,7 @@ const HRJobOpening = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>
 
                 {/* Main Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
@@ -60,14 +57,15 @@ const HRJobOpening = () => {
                         {/* Main Layout */}
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mb-4 sm:justify-end">
                             <button
+                            onClick={() => navigate("/job-opening/add")}
                                 className="px-3 py-1 bg-emerald-700 hover:bg-emerald-600 rounded text-sm w-full sm:w-auto">
                                 + Add Job Opening
                             </button>
                         </div>
-
+ 
                         {/* Card View Data */}
                         <div className="space-y-2">
-                            {jobs.map((job: GetJobOpening) => (
+                            {jobs?.content?.map((job) => (
                                 <div
                                     key={job.jobOpeningId}
                                     className="bg-neutral-900 border border-neutral-700 rounded-md p-3 sm:p-4 shadow-sm hover:shadow-md transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
@@ -83,10 +81,6 @@ const HRJobOpening = () => {
 
                                     {/* View Button */}
                                     <div className="flex flex-col sm:flex-row gap-2 sm:ml-4 w-full sm:w-auto">
-                                        <button
-                                            className="flex items-center gap-1 px-2 py-1 bg-purple-800 hover:bg-purple-700 rounded text-xs w-full sm:w-auto">
-                                            <Eye size={14} /> View
-                                        </button>
 
                                         {/* Update & Delete Button */}
                                         <>

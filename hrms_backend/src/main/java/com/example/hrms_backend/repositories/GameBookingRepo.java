@@ -25,4 +25,6 @@ public interface GameBookingRepo extends JpaRepository<GameBooking, UUID> {
     Optional<GameBooking> getGameBookingFromWaitingList(@Param("game_id") UUID gameId, @Param("time_slot_id") UUID timeSlotId);
 
     List<GameBooking> findByBooker_EmployeeIdAndTimeSlot_SlotDateGreaterThanEqual(UUID employeeId, LocalDate date);
+
+    boolean existsByBooker_EmployeeIdAndTimeSlot_SlotDateAndTimeSlot_StartTimeLessThanAndTimeSlot_EndTimeGreaterThan(UUID employeeId, LocalDate slotDate, LocalTime endTime, LocalTime startTime);
 }

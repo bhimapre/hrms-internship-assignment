@@ -5,22 +5,18 @@ import App from './App.tsx'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './auth/AuthContext.tsx';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Dashboard from './pages/Dashboard.tsx';
 import Login from './pages/Login.tsx';
 import { ToastContainer } from 'react-toastify';
 import AddJobOpening from './pages/Job Opening/AddJobOpening.tsx';
-import JobOpeningCard from './components/JobOpeningCard.tsx';
 import ShareJob from './pages/Job Opening/ShareJob.tsx';
 import ReferJob from './pages/Job Opening/ReferJob.tsx';
 import HRJobOpening from './pages/Job Opening/HRJobOpening.tsx';
-import JobOpenings from './pages/Job Opening/JobOpenings.tsx';
 import UpdateJobOpening from './pages/Job Opening/UpdateJobOpening.tsx';
 import UpdateJDFileJobOpening from './pages/Job Opening/UpdateJDFileJobOpening.tsx';
 import AddTravel from './pages/travel/AddTravel.tsx';
 import AllJobReferral from './pages/Job Opening/AllJobReferral.tsx';
 import UpdateJobReferral from './pages/Job Opening/UpdateJobReferral.tsx';
 import UpdateJobReferralCV from './pages/Job Opening/UpdateJobReferralCV.tsx';
-import TravelDetailsCard from './components/TravelDetailsCard.tsx';
 import { ThemeProvider } from '@emotion/react';
 import { theme } from './theme/theme.ts';
 import { CssBaseline } from '@mui/material';
@@ -28,9 +24,28 @@ import TravelList from './pages/travel/TravelList.tsx';
 import TravelDetails from './pages/travel/TravelDetails.tsx';
 import EmployeeTravelExpenses from './pages/travel expense/EmployeeTravelExpense.tsx';
 import EmployeeTravelDocuments from './pages/travel documents/EmployeeTravelDocuments.tsx';
-
+import UpdateTravel from './pages/travel/UpdateTravel.tsx';
+import AddTravelDocument from './pages/travel documents/AddTravelDocument.tsx';
+import UpdateTravelDocumentFile from './pages/travel documents/UpdateTravelDocumentFile.tsx';
+import AddTravelExpense from './pages/travel expense/AddTravelExpense.tsx';
+import AddGames from './pages/games/AddGames.tsx';
+import AllGames from './pages/games/AllGames.tsx';
+import AddExpenseProof from './pages/expense proofs/AddExpenseProof.tsx';
+import JobOpenings from './pages/Job Opening/JobOpenings.tsx';
+import Dashboard from './pages/Dashboard.tsx';
+import UpdateExpense from './pages/travel expense/UpdateExpense.tsx';
+import AllExpenseForHR from './pages/travel expense/AllExpenseForHR.tsx';
+import AllGameConfig from './pages/game config/AllGameConfig.tsx';
+import AddGameConfig from './pages/game config/AddGameConfig.tsx';
+import UpdateGameConfig from './pages/game config/UpdateGameConfig.tsx';
+import UpdateGame from './pages/games/UpdateGame.tsx';
+import ShowGamesForTimeSlot from './pages/games/ShowGamesForTimeSlot.tsx';
 
 const router = createBrowserRouter([
+  {
+    path: "/job-openings",
+    element: <JobOpenings />
+  },
   {
     path: "/dashboard",
     element: <Dashboard />
@@ -40,7 +55,7 @@ const router = createBrowserRouter([
     element: <Login />
   },
   {
-    path: "/job-opening",
+    path: "/job-opening/add",
     element: <AddJobOpening />
   },
   {
@@ -102,6 +117,70 @@ const router = createBrowserRouter([
   {
     path: "/travel/:travelId/employee/:employeeId",
     element: <EmployeeTravelDocuments />
+  },
+  {
+    path: "/travel/update/:travelId",
+    element: <UpdateTravel />
+  },
+  {
+    path: "/hr/travel-documents/:travelId",
+    element: <AddTravelDocument />
+  },
+  {
+    path: "/travel-documents/update-file/:travelDocumentId",
+    element: <UpdateTravelDocumentFile />
+  },
+  {
+    path: "/travel-expense/:travelId",
+    element: <AddTravelExpense />
+  },
+  {
+    path: "/expense/add/:travelId",
+    element: <AddTravelExpense />
+  },
+  {
+    path: "/travel/expense-proof/:expenseId",
+    element: <AddExpenseProof />
+  },
+  {
+    path: "/travel-documents/add/:travelId",
+    element: <AddTravelDocument />
+  },
+  {
+    path: "/expense/update/:expenseId",
+    element: <UpdateExpense />
+  },
+  {
+    path: "/hr/all-expenses/:travelId",
+    element: <AllExpenseForHR />
+  },
+  {
+    path: "/hr/game/add",
+    element: <AddGames />
+  },
+  {
+    path: "/hr/game", 
+    element: <AllGames />
+  },
+  {
+    path: "/hr/game/update/:gameId",
+    element: <UpdateGame />
+  },
+  {
+    path: "/hr/game-config",
+    element: <AllGameConfig />
+  },
+  {
+    path: "/hr/game-config/add",
+    element: <AddGameConfig />
+  },
+  {
+    path: "/hr/game-config/update/:configId",
+    element: <UpdateGameConfig />
+  },
+  {
+    path: "/games/booking",
+    element: <ShowGamesForTimeSlot />
   }
 ]);
 

@@ -37,6 +37,7 @@ public class TravelExpenseDto {
     @Enumerated(EnumType.STRING)
     private ExpenseStatus expenseStatus;
 
+    private UUID createdBy;
     private String hrRemark;
     private UUID travelId;
     private UUID employeeId;

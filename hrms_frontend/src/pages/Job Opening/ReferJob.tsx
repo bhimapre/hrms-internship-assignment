@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Navbar from '../../components/Navbar'
 import { useForm } from 'react-hook-form'
 import Sidebar from '../../components/Sidebar'
@@ -10,6 +10,8 @@ import Loading from '../../components/Loading'
 
 
 const ReferJob = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const { jobOpeningId } = useParams<{ jobOpeningId: string }>();
     if (!jobOpeningId) {
@@ -51,7 +53,7 @@ const ReferJob = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>
 
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

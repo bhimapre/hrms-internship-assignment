@@ -26,6 +26,7 @@ export const updateJobReferralApi = async (jobReferralId: string, data: UpdateJo
 // Fetch Job Referral By Id
 export const getJobReferralById = async (jobReferralId: string) => {
     const res = await api.get(`/api/job-referral/${jobReferralId}`);
+    console.log(res.data);
     return res.data;
 }
 

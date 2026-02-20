@@ -28,7 +28,7 @@ public class GameController {
 
     // Get all games only accessible by HR
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/api/common/game")
+    @GetMapping("/api/game")
     public ResponseEntity<List<GameDto>> getAllGames(){
         List<GameDto> game = gameService.getAllGames();
         return new ResponseEntity<>(game, HttpStatus.OK);
@@ -36,9 +36,25 @@ public class GameController {
 
     // Get game by id accessible by all
     @PreAuthorize("isAuthenticated()")
-    @GetMapping("/api/common/game/{gameId}")
+    @GetMapping("/api/game/{gameId}")
     public ResponseEntity<GameDto> getGameById(@PathVariable UUID gameId){
         GameDto gameDto = gameService.getGameById(gameId);
         return ResponseEntity.ok(gameDto);
+    }
+
+    // Update Game
+    @PreAuthorize("hasAuthority('HR')")
+    @PutMapping("/api/game/{gameId}")
+    public ResponseEntity<GameDto> updateGame(@PathVariable UUID gameId, @Valid @RequestBody GameDto gameDto){
+        GameDto game = gameService.updateGame(gameId, gameDto);
+        return ResponseEntity.ok(game);
+    }
+
+    // Delete or Soft delete we just change the status
+    @PreAuthorize("hasAuthority('HR')")
+    @PutMapping("/api/game/delete/{gameId}")
+    public ResponseEntity<GameDto> deleteGame(@PathVariable UUID gameId){
+        GameDto game = gameService.deleteGame(gameId);
+        return ResponseEntity.ok(game);
     }
 }

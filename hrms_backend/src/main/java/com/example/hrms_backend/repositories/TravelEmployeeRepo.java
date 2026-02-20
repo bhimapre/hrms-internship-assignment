@@ -19,4 +19,8 @@ public interface TravelEmployeeRepo extends JpaRepository<TravelEmployee, UUID> 
     Page<TravelEmployee> findByEmployee_EmployeeIdIn(Collection<UUID> employeeIds, Pageable pageable);
 
     List<TravelEmployee> findByTravel_TravelId(UUID travelId);
+
+    List<TravelEmployee> findByEmployee_EmployeeId(UUID employeeEmployeeId);
+
+    List<TravelEmployee> findByEmployee_Manager_EmployeeId(UUID employeeManagerEmployeeId);
 }

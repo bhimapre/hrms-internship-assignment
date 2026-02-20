@@ -6,5 +6,6 @@ export const useHrAllJobOpenings = (page: number, size = 5) => {
     return useQuery<PageResponse<GetJobOpening>>({
         queryKey: ["hr-job-openings", page, size],
         queryFn: () => fetchAllJobsForHRApi(page, size),
+        placeholderData: (x) => x
     });
 }

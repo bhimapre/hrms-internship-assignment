@@ -10,11 +10,11 @@ import { Sidebar } from 'lucide-react';
 
 const UpdateJobReferral = () => {
 
-    const { jobReferralId } = useParams();
-
+    const { jobReferralId } = useParams<{jobReferralId: string}>();
+    console.log(jobReferralId);
     const { mutate: updateJobReferral } = useUpdateJobReferral();
 
-    const { data, isLoading } = useGetJobReferralById();
+    const { data, isLoading } = useGetJobReferralById(jobReferralId);
 
     const { register, formState: { errors }, handleSubmit, reset } = useForm<FetchAllJobReferrals>();
 

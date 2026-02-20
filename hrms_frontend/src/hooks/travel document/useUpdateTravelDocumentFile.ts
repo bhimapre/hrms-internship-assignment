@@ -5,9 +5,9 @@ import { toast } from "react-toastify";
 export const useUpdateTravelDocumentFile = () => {
     return useMutation({
         mutationFn: ({
-            documentId, file}: {
-                documentId: string; file: File;
-            }) => updateTravelDocumentFile(documentId, file),
+            travelDocumentId, file}: {
+                travelDocumentId: string; file: File;
+            }) => updateTravelDocumentFile(travelDocumentId, file),
         
         onSuccess: () =>{
             toast.success("Travel Document file update successfully"); 

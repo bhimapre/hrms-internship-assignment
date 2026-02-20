@@ -52,20 +52,15 @@ const AllJobReferral = () => {
                                     className="bg-neutral-900 border border-neutral-700 rounded-md p-3 sm:p-4 shadow-sm hover:shadow-md transition flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-sm">
                                     <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 sm:gap-x-6 gap-y-1 flex-1 min-w-0">
-                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Name:</span> Name</p>
-                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Email:</span> Email</p>
-                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Phone Number:</span> Phone Number</p>
-                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Status:</span> Status</p>
+                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Name:</span>{referral.name}</p>
+                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Email:</span> {referral.email}</p>
+                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Phone Number:</span>{referral.phoneNumber}</p>
+                                            <p className="wrap-break-word"><span className="font-medium text-purple-300">Status:</span>{referral.jobReferralStatus}</p>
                                         </div>
                                     </div>
 
                                     {/* View Button */}
                                     <div className="flex flex-col sm:flex-row gap-2 sm:ml-4 w-full sm:w-auto">
-                                        <button
-                                            className="flex items-center gap-1 px-2 py-1 bg-purple-800 hover:bg-purple-700 rounded text-xs w-full sm:w-auto">
-                                            <Eye size={14} /> View
-                                        </button>
-
                                         {/* Update & Delete Button */}
                                         <>
                                             <button

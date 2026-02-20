@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.hrms_backend.dto.JobOpeningDto;
 import com.example.hrms_backend.dto.JobReferralDto;
+import com.example.hrms_backend.dto.JobReferralFrontendDto;
 import com.example.hrms_backend.dto.JobReferralStatusDto;
 import com.example.hrms_backend.entities.Employee;
 import com.example.hrms_backend.entities.JobOpening;
@@ -112,15 +113,15 @@ public class JobReferralService {
     }
 
     // Get all job referrals
-    public Page<JobReferralDto> getAllJobReferralsForHR(Pageable pageable){
+    public Page<JobReferralFrontendDto> getAllJobReferralsForHR(Pageable pageable){
 
         Page<JobReferral> jobReferrals = jobReferralRepo.findAll(pageable);
         return jobReferrals.map(job ->
-                modelMapper.map(job, JobReferralDto.class));
+                modelMapper.map(job, JobReferralFrontendDto.class));
     }
 
     // Get job referrals by id
-    public JobReferralDto getJobReferralById(UUID jobReferralId){
+    public JobReferralFrontendDto getJobReferralById(UUID jobReferralId){
         UUID userId = SecurityUtils.getCurrentUserId();
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
         UUID employeeId = employee.getEmployeeId();
@@ -131,9 +132,9 @@ public class JobReferralService {
             if(!jobReferral.getCreatedBy().equals(employeeId)){
                 throw new AccessDeniedException("You have no access of this job referral");
             }
-            return modelMapper.map(jobReferral, JobReferralDto.class);
+            return modelMapper.map(jobReferral, JobReferralFrontendDto.class);
         }
-        return modelMapper.map(jobReferral, JobReferralDto.class);
+        return modelMapper.map(jobReferral, JobReferralFrontendDto.class);
     }
 
     // Update job referral status

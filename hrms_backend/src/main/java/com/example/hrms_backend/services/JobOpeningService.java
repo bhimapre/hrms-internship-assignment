@@ -3,6 +3,7 @@ package com.example.hrms_backend.services;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.hrms_backend.dto.JobOpeningDto;
+import com.example.hrms_backend.dto.JobOpeningViewDto;
 import com.example.hrms_backend.entities.Employee;
 import com.example.hrms_backend.entities.JobOpening;
 import com.example.hrms_backend.entities.enums.JobOpeningStatus;
@@ -71,14 +72,14 @@ public class JobOpeningService {
     }
 
     // Get all open job openings
-    public Page<JobOpeningDto> getAllOpenJobs(Pageable pageable){
+    public Page<JobOpeningViewDto> getAllOpenJobs(Pageable pageable){
         Page<JobOpening>  jobOpenings = jobOpeningRepo.findAllByJobOpeningStatus(JobOpeningStatus.OPEN, pageable);
         return jobOpenings.map(job ->
-                modelMapper.map(job, JobOpeningDto.class));
+                modelMapper.map(job, JobOpeningViewDto.class));
     }
 
     // Get all job openings
-    public Page<JobOpeningDto> getAllJobs(Pageable pageable)
+    public Page<JobOpeningViewDto> getAllJobs(Pageable pageable)
     {
         String role = SecurityUtils.getRole();
         if(!role.equals("HR")){
@@ -87,29 +88,29 @@ public class JobOpeningService {
 
         Page<JobOpening> jobs = jobOpeningRepo.findAll(pageable);
         return jobs.map(j ->
-                modelMapper.map(j, JobOpeningDto.class));
+                modelMapper.map(j, JobOpeningViewDto.class));
     }
 
     // Get open job opening by id
-    public JobOpeningDto getOpenJobById(UUID jobOpeningId){
+    public JobOpeningViewDto getOpenJobById(UUID jobOpeningId){
         JobOpening jobOpening = jobOpeningRepo.findById(jobOpeningId).orElseThrow(() -> new ResourceNotFoundException(JOB_NOT_FOUND));
 
         if(!jobOpening.getJobOpeningStatus().equals(JobOpeningStatus.OPEN)){
             throw new BadRequestException("Job is not open");
         }
 
-        return modelMapper.map(jobOpening, JobOpeningDto.class);
+        return modelMapper.map(jobOpening, JobOpeningViewDto.class);
     }
 
     // Get all job opening by id
-    public JobOpeningDto getJobById(UUID jobOpeningId){
+    public JobOpeningViewDto getJobById(UUID jobOpeningId){
         String role = SecurityUtils.getRole();
         if(!role.equals("HR")){
             throw new AccessDeniedException("You have no access of it");
         }
 
         JobOpening jobOpening = jobOpeningRepo.findById(jobOpeningId).orElseThrow(() -> new ResourceNotFoundException(JOB_NOT_FOUND));
-        return modelMapper.map(jobOpening, JobOpeningDto.class);
+        return modelMapper.map(jobOpening, JobOpeningViewDto.class);
     }
 
     // Update job opening

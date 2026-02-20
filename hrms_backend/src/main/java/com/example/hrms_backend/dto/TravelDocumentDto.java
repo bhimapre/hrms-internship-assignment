@@ -17,6 +17,7 @@ public class TravelDocumentDto {
 
     private String ownerType;
     private String travelDocumentFileUrl;
+    private UUID uploadedBy;
 
     private UUID travelId;
     private UUID employeeID;

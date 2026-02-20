@@ -31,6 +31,6 @@ export const fetchAllTravelsApi = async (page: number, size: number):
 
 // Soft Delete Travel
 export const deleteTravelApi = async (travelId: string) => {
-    const res = await api.patch(`api/travel/cancel/${travelId}`);
+    const res = await api.put(`api/travel/cancel/${travelId}`);
     return res.data;
 }

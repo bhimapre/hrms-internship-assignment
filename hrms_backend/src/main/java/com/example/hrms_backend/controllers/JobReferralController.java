@@ -1,6 +1,7 @@
 package com.example.hrms_backend.controllers;
 
 import com.example.hrms_backend.dto.JobReferralDto;
+import com.example.hrms_backend.dto.JobReferralFrontendDto;
 import com.example.hrms_backend.dto.JobReferralStatusDto;
 import com.example.hrms_backend.services.JobReferralService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,16 +50,16 @@ public class JobReferralController {
 
     @PreAuthorize("hasAuthority('HR')")
     @GetMapping("/api/hr/job-referral")
-    public ResponseEntity<Page<JobReferralDto>> getAllReferralByHR(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size){
+    public ResponseEntity<Page<JobReferralFrontendDto>> getAllReferralByHR(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<JobReferralDto> referrals = jobReferralService.getAllJobReferralsForHR(pageable);
+        Page<JobReferralFrontendDto> referrals = jobReferralService.getAllJobReferralsForHR(pageable);
         return new ResponseEntity<>(referrals, HttpStatus.OK);
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/job-referral/{jobReferralId}")
-    public ResponseEntity<JobReferralDto> getReferralById(@PathVariable UUID jobReferralId){
-        JobReferralDto referral = jobReferralService.getJobReferralById(jobReferralId);
+    public ResponseEntity<JobReferralFrontendDto> getReferralById(@PathVariable UUID jobReferralId){
+        JobReferralFrontendDto referral = jobReferralService.getJobReferralById(jobReferralId);
         return new ResponseEntity<>(referral, HttpStatus.OK);
     }
 

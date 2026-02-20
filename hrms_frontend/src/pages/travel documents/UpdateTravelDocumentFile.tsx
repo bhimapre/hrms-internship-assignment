@@ -12,20 +12,20 @@ type FileForm = {
 
 const UpdateTravelDocumentFile = () => {
 
-    const { documentId } = useParams<{documentId: string}>();
+    const { travelDocumentId } = useParams<{travelDocumentId: string}>();
 
     const{ mutate: updateFile, isPending} = useUpdateTravelDocumentFile();
 
     const { register, formState: { errors }, handleSubmit } = useForm<FileForm>();
 
     const onSubmit = (data: FileForm) => {
-        if(!documentId){
-            toast.error("Job opening Id not found");
+        if(!travelDocumentId){
+            toast.error("docuemnt Id not found");
             return;
         }
 
         const file = data.file[0];
-        updateFile({documentId, file});
+        updateFile({travelDocumentId, file});
     }
 
     if(isPending){

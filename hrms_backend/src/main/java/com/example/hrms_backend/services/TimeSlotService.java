@@ -47,6 +47,10 @@ public class TimeSlotService {
         Game game = gameRepo.findById(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found"));
 
+        if(toDate.isBefore(fromDate)){
+            throw new BadRequestException("To date is not before to date");
+        }
+
         for (LocalDate date = fromDate;
              !date.isAfter(toDate);
              date = date.plusDays(1)) {

@@ -28,13 +28,16 @@ public interface TravelExpenseRepo extends JpaRepository<TravelExpense, UUID> {
     SELECT te FROM TravelExpense te
     JOIN te.employee e
     JOIN te.travel t
-    WHERE(:employeeName IS  NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :employeeName, '%' )))
+    WHERE (:travelId IS NULL OR t.travelId =:travelId)
+    AND (:employeeName IS  NULL OR LOWER(e.name) LIKE LOWER(CONCAT('%', :employeeName, '%' )))
     AND (:travelTitle IS NULL OR LOWER(t.travelTitle) LIKE (CONCAT('%', :travelTitle, '%')))
     AND (:status IS NULL OR te.expenseStatus = :status)
     AND (:fromDate IS NULL OR te.expenseDate >= :fromDate)
     AND (:toDate IS NULL OR te.expenseDate <= :toDate)
+    
 """)
-    Page<TravelExpense> searchHrExpense(@Param("employeeName") String employeeName,
+    Page<TravelExpense> searchHrExpense(@Param("travelId") UUID travelId,
+                                        @Param("employeeName") String employeeName,
                                         @Param("travelTitle") String travelTitle,
                                         @Param("status")ExpenseStatus status,
                                         @Param("fromDate")LocalDate fromDate,
