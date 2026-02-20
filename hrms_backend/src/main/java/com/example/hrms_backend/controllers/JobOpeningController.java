@@ -1,6 +1,7 @@
 package com.example.hrms_backend.controllers;
 
 import com.example.hrms_backend.dto.JobOpeningDto;
+import com.example.hrms_backend.dto.JobOpeningViewDto;
 import com.example.hrms_backend.services.JobOpeningService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
@@ -36,31 +37,31 @@ public class JobOpeningController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/job-opening")
-    public ResponseEntity <Page<JobOpeningDto>> allOpenJobs(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "6") int size){
+    public ResponseEntity <Page<JobOpeningViewDto>> allOpenJobs(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "6") int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<JobOpeningDto> jobOpeningDto = jobOpeningService.getAllOpenJobs(pageable);
+        Page<JobOpeningViewDto> jobOpeningDto = jobOpeningService.getAllOpenJobs(pageable);
         return ResponseEntity.ok(jobOpeningDto);
     }
 
     @PreAuthorize("hasAuthority('HR')")
     @GetMapping("/api/hr/job-opening")
-    public ResponseEntity<Page<JobOpeningDto>> allJobs(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size){
+    public ResponseEntity<Page<JobOpeningViewDto>> allJobs(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size){
         Pageable pageable = PageRequest.of(page, size);
-        Page<JobOpeningDto> jobOpenings = jobOpeningService.getAllJobs(pageable);
+        Page<JobOpeningViewDto> jobOpenings = jobOpeningService.getAllJobs(pageable);
         return ResponseEntity.ok(jobOpenings);
     }
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/job-opening/{jobOpeningId}")
-    public ResponseEntity<JobOpeningDto> getOpenJobById(@PathVariable UUID jobOpeningId){
-        JobOpeningDto jobOpening = jobOpeningService.getOpenJobById(jobOpeningId);
+    public ResponseEntity<JobOpeningViewDto> getOpenJobById(@PathVariable UUID jobOpeningId){
+        JobOpeningViewDto jobOpening = jobOpeningService.getOpenJobById(jobOpeningId);
         return new ResponseEntity<>(jobOpening, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('HR')")
     @GetMapping("/api/hr/job-opening/{jobOpeningId}")
-    public ResponseEntity<JobOpeningDto> getJobById(@PathVariable UUID jobOpeningId){
-        JobOpeningDto jobOpening = jobOpeningService.getJobById(jobOpeningId);
+    public ResponseEntity<JobOpeningViewDto> getJobById(@PathVariable UUID jobOpeningId){
+        JobOpeningViewDto jobOpening = jobOpeningService.getJobById(jobOpeningId);
         return new ResponseEntity<>(jobOpening, HttpStatus.OK);
     }
 

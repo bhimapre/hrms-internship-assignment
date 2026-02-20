@@ -1,6 +1,6 @@
 import { Card, Typography, Box, Button, Chip, Stack } from "@mui/material";
 import type { TravelDocuments } from "../types/TravelDocuments";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface Props {
   documents?: TravelDocuments[];
@@ -8,6 +8,7 @@ interface Props {
 
 export default function TravelDocuments({ documents = [] }: Props) {
 
+  const travelId = useParams();
   const role = localStorage.getItem("role");
   const navigate = useNavigate();
 
@@ -17,8 +18,14 @@ export default function TravelDocuments({ documents = [] }: Props) {
         Travel Documents
       </Typography>
 
+      {role === "HR" && (
+        <>
+          <Button onClick={() => navigate(`/hr/travel-documents/${travelId}`)} variant="contained">Add Documents</Button>
+        </>
+      )}
+
       {documents.length === 0 && (<Typography variant="body2" color="text.secondary">No Documents for HR found</Typography>)}
-      <Box sx={{ maxHeight: 300, overflowY: "auto" }}>
+      <Box sx={{ maxHeight: 300, overflowY: "auto", mt: 2 }}>
         {documents.map((doc) => (
           <Card
             key={doc.travelDocumentId}
@@ -44,11 +51,10 @@ export default function TravelDocuments({ documents = [] }: Props) {
             </Box>
 
             <Stack direction="row" spacing={1}>
-              <Button onClick={() => window.open(doc.travelDocumentFileUrl)}  variant="contained">View</Button>
+              <Button onClick={() => window.open(doc.travelDocumentFileUrl)} variant="contained">View</Button>
 
               {role === "HR" && (<>
-                <Button variant="contained">Update</Button>
-                <Button variant="contained" color="error">Delete</Button>
+                <Button onClick={() => navigate(`/travel-documents/update-file/${doc.travelDocumentId}`)} variant="contained" size="small">Update File</Button>
               </>)}
             </Stack>
           </Card>

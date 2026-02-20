@@ -1,9 +1,13 @@
 package com.example.hrms_backend.controllers;
 
+import com.example.hrms_backend.dto.AssignTravelDto;
 import com.example.hrms_backend.dto.CreateTravelRequestDto;
 import com.example.hrms_backend.dto.EmployeeDto;
 import com.example.hrms_backend.dto.TravelDto;
+import com.example.hrms_backend.entities.Employee;
+import com.example.hrms_backend.exception.ResourceNotFoundException;
 import com.example.hrms_backend.services.TravelService;
+import com.example.hrms_backend.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -56,16 +60,28 @@ public class TravelController {
 
     // Cancel travel
     @PreAuthorize("hasAuthority('HR')")
-    @PostMapping("api/travel/cancel/{travelId}")
+    @PutMapping("api/travel/cancel/{travelId}")
     public ResponseEntity<Void> cancelTravel(@PathVariable UUID travelId){
         travelService.cancelTravel(travelId);
         return ResponseEntity.noContent().build();
     }
 
     //Assign Employee
-    @PreAuthorize("hasAuthority('HR')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("api/travel/employees/{travelId}")
     public ResponseEntity<List<EmployeeDto>> getAssignEmployees(@PathVariable UUID travelId){
         return ResponseEntity.ok(travelService.assignEmployee(travelId));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("api/travel/assigned")
+    public ResponseEntity<List<AssignTravelDto>> getAllAssign(){
+        return ResponseEntity.ok(travelService.getAllAssignEmployee());
+    }
+
+    @PreAuthorize("hasAuthority('MANAGER')")
+    @GetMapping("/api/travel/manager/assigned")
+    public ResponseEntity<List<AssignTravelDto>> getManagerAssignedTravels() {
+        return ResponseEntity.ok(travelService.getManagerAssignedTravels());
     }
 }

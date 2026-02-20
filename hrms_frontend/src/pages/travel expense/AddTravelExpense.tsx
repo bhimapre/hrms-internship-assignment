@@ -1,26 +1,33 @@
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import type { TravelExpenseBase } from '../../types/TravelExpense';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useCreateTravelExpense } from '../../hooks/travelExpense/useCreateTravelExpense';
 import Navbar from '../../components/Navbar';
 import { toast } from 'react-toastify';
 
 const AddTravelExpense = () => {
 
-    const {travelId} = useParams<{travelId: string}>();
-    if(!travelId){
+    const navigate = useNavigate();
+
+    const { travelId } = useParams<{ travelId: string }>();
+    if (!travelId) {
         toast.error("Travel id not found");
         return;
     }
 
-    const {register, handleSubmit, formState:{errors}} = useForm<TravelExpenseBase>();
+    const { register, handleSubmit, formState: { errors } } = useForm<TravelExpenseBase>();
 
-    const {data: createExpense} = useCreateTravelExpense();
+    const { mutateAsync: createExpense } = useCreateTravelExpense();
 
-    const onSubmit = (data: TravelExpenseBase) => {
-        createExpense({travelId, data});
-      }
+    const onSubmit = async (data: TravelExpenseBase) => {
+        try {
+            const expense = await createExpense({ travelId, data });
+            navigate(`/travel/expense-proof/${expense.travelExpenseId}`)
+        } catch (error) {
+            toast.error("Something went wrong");
+        }
+    }
 
     return (
         <div className="flex flex-col h-screen">

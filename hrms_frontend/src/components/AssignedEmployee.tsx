@@ -6,12 +6,12 @@ interface Props {
   employees?: AssignEmployeeTravel[];
 }
 
-export default function AssignedEmployees({employees = []}: Props) {
+export default function AssignedEmployees({ employees = [] }: Props) {
 
-  const role =localStorage.getItem("role");
+  const role = localStorage.getItem("role");
   const navigate = useNavigate();
 
-  const { travelId } = useParams();
+  const { travelId } = useParams<{travelId: string}>();
 
   return (
     <Card sx={{ p: 3, mb: 3, backgroundColor: "background.paper" }}>

@@ -22,11 +22,11 @@ const JobOpenings = () => {
         <div className="flex flex-col h-screen bg-neutral-950 text-neutral-100">
             <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                 <div className="text-center mt-8 mb-8">
-                    <h1 className="text-4xl font-bold text-center text-white mb-4">HR Job Opening</h1>
+                    <h1 className="text-4xl font-bold text-center text-white mb-4">Job Opening</h1>
                 </div>
                 {/* Job Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {data?.content.map((job) => (
+                    {data?.content?.map((job) => (
                         <JobOpeningCard key={job.jobOpeningId} job={job} />
                     ))}
                 </div>

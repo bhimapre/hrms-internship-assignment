@@ -16,4 +16,5 @@ export interface TravelDocuments{
     travelDocumentFileUrl: string;
     ownerType: "HR" | "EMPLOYEE";
     travelId: string;
+    uploadedBy: string;
 }

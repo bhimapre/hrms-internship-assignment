@@ -200,4 +200,10 @@ public class EmployeeService {
 
         return employee.getProfilePictureFileUrl();
     }
+
+    // Set employee id as login
+    public Employee getCurrentEmployee(){
+        UUID userId = SecurityUtils.getCurrentUserId();
+        return employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
+    }
 }

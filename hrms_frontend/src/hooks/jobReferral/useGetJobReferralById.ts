@@ -3,7 +3,7 @@ import { getJobReferralById } from "../../api/jobReferral";
 
 export const useGetJobReferralById = (jobReferralId?: string) =>{
     return useQuery({
-        queryKey: ["job-referral", jobReferralId],
+        queryKey: ["job-referral-id", jobReferralId],
         queryFn: () => getJobReferralById(jobReferralId!),
         enabled: !!jobReferralId
     });

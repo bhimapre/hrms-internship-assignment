@@ -23,5 +23,7 @@ public class GameTimeSlotConfigDto {
     @NotNull(message = "Max players field is required")
     private int maxPlayers;
 
+    private String gameName;
+
     private boolean active;
 }

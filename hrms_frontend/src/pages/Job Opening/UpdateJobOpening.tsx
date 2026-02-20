@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../../components/Navbar'
 import { useForm } from 'react-hook-form';
 import type { JobOpeningInterface } from './AddJobOpening';
@@ -12,6 +12,8 @@ import Loading from '../../components/Loading';
 const UpdateJobOpening = () => {
 
     const { jobOpeningId } = useParams<{ jobOpeningId: string }>();
+    console.log(jobOpeningId);
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const { mutate: updateJob } = useUpdateJobOpening();
 
@@ -28,9 +30,11 @@ const UpdateJobOpening = () => {
     }
 
     useEffect(() => {
+        console.log("job data", jobData);
         if (jobData) {
             reset(jobData);
         }
+        
     }, [jobData, reset]);
 
     if (isLoading) {
@@ -45,7 +49,7 @@ const UpdateJobOpening = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                <Sidebar />
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>
 
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

@@ -54,7 +54,7 @@ public class TravelExpenseService {
             throw new BadRequestException("Travel is cancelled");
         }
         
-        boolean hasAccess = travelEmployeeRepo.existsByTravel_TravelIdAndEmployee_EmployeeId(travelExpenseDto.getTravelId(), employeeId);
+        boolean hasAccess = travelEmployeeRepo.existsByTravel_TravelIdAndEmployee_EmployeeId(travelId, employeeId);
         if(!hasAccess){
             throw new BadRequestException("Travel or Employee not found");
         }
@@ -296,14 +296,15 @@ public class TravelExpenseService {
     }
 
     // Filter Travel Expense
-    public Page<TravelExpenseDto> getHrExpense(String employeeName,
+    public Page<TravelExpenseDto> getHrExpense(UUID travelId,
+                                               String employeeName,
                                                String travelTitle,
                                                ExpenseStatus expenseStatus,
                                                LocalDate fromDate,
                                                LocalDate toDate,
                                                Pageable pageable)
     {
-        Page<TravelExpense> expense = travelExpenseRepo.searchHrExpense(employeeName, travelTitle, expenseStatus, fromDate, toDate, pageable);
+        Page<TravelExpense> expense = travelExpenseRepo.searchHrExpense(travelId, employeeName, travelTitle, expenseStatus, fromDate, toDate, pageable);
         return expense.map(e ->
                 modelMapper.map(e, TravelExpenseDto.class));
     }

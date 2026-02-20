@@ -35,19 +35,18 @@ public class GameBookingService {
     private final GameTimeSlotConfigRepo gameTimeSlotConfigRepo;
     private final NotificationService notificationService;
 
-    @Transactional
     public GameBookingDto createGameBooking(CreateGameBookingDto createGameBookingDto){
 
-        GameBooking booking = modelMapper.map(createGameBookingDto, GameBooking.class);
+        GameBooking booking = new GameBooking();
 
         Employee employee = employeeRepo.findById(createGameBookingDto.getBookerId()).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
         TimeSlot timeSlot = timeSlotRepo.findById(createGameBookingDto.getTimeSlotId()).orElseThrow(() -> new ResourceNotFoundException("Time slot not found"));
         Game game = gameRepo.findById(createGameBookingDto.getGameId()).orElseThrow(() -> new ResourceNotFoundException("Game is not found"));
         GameTimeSlotConfig timeSlotConfig = gameTimeSlotConfigRepo.findByGame_GameId(game.getGameId()).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
 
-        if(!employee.getGamePreferences().contains(game)){
-            throw new BadRequestException("You must select this game preference before booking game slot");
-        }
+//        if(!employee.getGamePreferences().contains(game)){
+//            throw new BadRequestException("You must select this game preference before booking game slot");
+//        }
 
         List<UUID> members = createGameBookingDto.getMemberIds();
         long memberCount = members.size();
@@ -79,50 +78,50 @@ public class GameBookingService {
         }
 
         LocalDate today = LocalDate.now();
-        LocalTime startTime = booking.getTimeSlot().getStartTime();
-        LocalTime endTime = booking.getTimeSlot().getEndTime();
+        LocalTime startTime = timeSlot.getStartTime();
+        LocalTime endTime = timeSlot.getEndTime();
 
         // Check if time slot is past or not
-        LocalDateTime compare = LocalDateTime.of(booking.getTimeSlot().getSlotDate(), booking.getTimeSlot().getStartTime());
+        LocalDateTime compare = LocalDateTime.of(timeSlot.getSlotDate(), timeSlot.getStartTime());
         if(compare.isBefore(LocalDateTime.now())){
             throw new BadRequestException("You cannot book past slots");
         }
 
         // Check booker is played particular game today
-        boolean isBookerPlayedGameToday = gameBookingRepo.existsByBooker_EmployeeIdAndGame_GameIdAndTimeSlot_SlotDate(createGameBookingDto.getBookerId(), createGameBookingDto.getGameId(), today);
+        boolean isBookerPlayedGameToday = gameBookingRepo.existsByBooker_EmployeeIdAndGame_GameIdAndTimeSlot_SlotDate(employee.getEmployeeId(), game.getGameId(), today);
         if(isBookerPlayedGameToday){
             throw new BadRequestException("You already played this game or you already booked one slot of this game. You can join the waiting queue.");
         }
 
-        // Check booker is already booked any time slot during this time slot
-        boolean isBookerHaveAlreadyTimeSlotInAnotherGame = gameBookingRepo.existsByBooker_EmployeeIdAndTimeSlot_StartTimeAndTimeSlot_EndTimeAndTimeSlot_SlotDate(booking.getBooker().getEmployeeId(), startTime, endTime, timeSlot.getSlotDate());
-        if(isBookerHaveAlreadyTimeSlotInAnotherGame){
-            throw new BadRequestException("You already have booked this slot for another game");
-        }
+//        // Check booker is already booked any time slot during this time slot
+//        boolean isBookerHaveAlreadyTimeSlotInAnotherGame = gameBookingRepo.existsByBooker_EmployeeIdAndTimeSlot_StartTimeAndTimeSlot_EndTimeAndTimeSlot_SlotDate(employee.getEmployeeId(), startTime, endTime, timeSlot.getSlotDate());
+//        if(isBookerHaveAlreadyTimeSlotInAnotherGame){
+//            throw new BadRequestException("You already have booked this slot for another game");
+//        }
 
         // Check any booking member is not played particular game today
-        boolean isBookingPlayersPlayedGameToday = gameBookingMemberRepo.existsByTimeSlot_Game_GameIdAndTimeSlot_SlotDateAndEmployee_EmployeeIdIn(createGameBookingDto.getGameId(), today, members);
+        boolean isBookingPlayersPlayedGameToday = gameBookingMemberRepo.existsByTimeSlot_Game_GameIdAndTimeSlot_SlotDateAndEmployee_EmployeeIdIn(game.getGameId(), today, members);
         if(isBookingPlayersPlayedGameToday){
             throw new BadRequestException("Some one already played this game today");
         }
 
-        // Check booking members are already booked any time slot during this time slot
-        boolean isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame = gameBookingMemberRepo.existsByTimeSlot_StartTimeAndTimeSlot_EndTimeAndTimeSlot_SlotDateAndEmployee_EmployeeIdIn(startTime, endTime, timeSlot.getSlotDate(), members);
-        if(isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame){
-            throw new BadRequestException("Some one already played this game today");
-        }
+//        // Check booking members are already booked any time slot during this time slot
+//        boolean isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame = gameBookingMemberRepo.existsByTimeSlot_StartTimeAndTimeSlot_EndTimeAndTimeSlot_SlotDateAndEmployee_EmployeeIdIn(startTime, endTime, timeSlot.getSlotDate(), members);
+//        if(isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame){
+//            throw new BadRequestException("Some one already played this game today");
+//        }
 
         booking.setBookingStatus(BookingStatus.CONFIRMED);
         booking.setBooker(employee);
         booking.setTimeSlot(timeSlot);
-        booking.setGame(game);
-        booking.setCreatedBy(createGameBookingDto.getBookerId());
+        booking.setGame(timeSlot.getGame());
+        booking.setCreatedBy(employee.getEmployeeId());
         booking.setCreatedAt(LocalDateTime.now());
 
         booking = gameBookingRepo.save(booking);
 
         notificationService.sendNotification(employee.getEmployeeId(), "Game Booking Alert",
-                booking.getGame().getGameName() + " booking successful on " + timeSlot.getSlotDate() + " form " + timeSlot.getStartTime() + " to " + timeSlot.getEndTime(),
+                booking.getGame().getGameName() + " booking successful on " + timeSlot.getSlotDate() + " from " + timeSlot.getStartTime() + " to " + timeSlot.getEndTime(),
                 NotificationType.GAME_BOOKING);
 
         for(UUID memberId : members){

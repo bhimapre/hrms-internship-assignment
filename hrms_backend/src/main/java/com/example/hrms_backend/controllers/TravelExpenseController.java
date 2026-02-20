@@ -79,7 +79,8 @@ public class TravelExpenseController {
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("api/hr/expense/filter")
-    public ResponseEntity<Page<TravelExpenseDto>> getExpenseFilter(@RequestParam(required = false) String employeeName,
+    public ResponseEntity<Page<TravelExpenseDto>> getExpenseFilter(@RequestParam UUID travelId,
+                                                                   @RequestParam(required = false) String employeeName,
                                                                    @RequestParam(required = false) String travelTitle,
                                                                    @RequestParam(required = false)ExpenseStatus status,
                                                                    @RequestParam(required = false)LocalDate fromDate,
@@ -87,7 +88,7 @@ public class TravelExpenseController {
                                                                    @RequestParam(defaultValue = "0") int page,
                                                                    @RequestParam(defaultValue = "5") int size)
     {
-        Page<TravelExpenseDto> expenseDto = travelExpenseService.getHrExpense(employeeName, travelTitle, status, fromDate, toDate, PageRequest.of(page, size,
+        Page<TravelExpenseDto> expenseDto = travelExpenseService.getHrExpense(travelId, employeeName, travelTitle, status, fromDate, toDate ,PageRequest.of(page, size,
                 Sort.by("createdAt").descending()));
 
         return ResponseEntity.ok(expenseDto);

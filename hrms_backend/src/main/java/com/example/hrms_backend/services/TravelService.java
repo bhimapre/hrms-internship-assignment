@@ -1,5 +1,6 @@
 package com.example.hrms_backend.services;
 
+import com.example.hrms_backend.dto.AssignTravelDto;
 import com.example.hrms_backend.dto.CreateTravelRequestDto;
 import com.example.hrms_backend.dto.EmployeeDto;
 import com.example.hrms_backend.dto.TravelDto;
@@ -246,6 +247,57 @@ public class TravelService {
 
         return employees.stream()
                 .map(e -> modelMapper.map(e, EmployeeDto.class))
+                .toList();
+    }
+
+    // Assign Travel
+    public List<AssignTravelDto> getAllAssignEmployee(){
+        UUID userId = SecurityUtils.getCurrentUserId();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
+        UUID employeeId = employee.getEmployeeId();
+
+        return travelEmployeeRepo.findByEmployee_EmployeeId(employeeId)
+                .stream()
+                .map(te -> {
+                    Travel t = te.getTravel();
+                    return new AssignTravelDto(
+                            t.getTravelId(),
+                            t.getTravelTitle(),
+                            t.getTravelDateFrom(),
+                            t.getTravelDateTo(),
+                            t.getTravelLocation(),
+                            t.getTravelDetails(),
+                            t.getTravelStatus()
+                    );
+                })
+                .toList();
+    }
+
+
+    public List<AssignTravelDto> getManagerAssignedTravels() {
+
+        UUID userId = SecurityUtils.getCurrentUserId();
+
+        Employee manager = employeeRepo
+                .findByUser_UserId(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("EMPLOYEE_NOT_FOUND"));
+
+        UUID managerId = manager.getEmployeeId();
+
+        return travelEmployeeRepo
+                .findByEmployee_Manager_EmployeeId(managerId)
+                .stream()
+                .map(TravelEmployee::getTravel)
+                .distinct()
+                .map(travel -> new AssignTravelDto(
+                        travel.getTravelId(),
+                        travel.getTravelTitle(),
+                        travel.getTravelDateFrom(),
+                        travel.getTravelDateTo(),
+                        travel.getTravelLocation(),
+                        travel.getTravelDetails(),
+                        travel.getTravelStatus()
+                ))
                 .toList();
     }
 }

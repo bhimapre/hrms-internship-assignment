@@ -1,8 +1,11 @@
 package com.example.hrms_backend.controllers;
 
 import com.example.hrms_backend.dto.EmployeeDto;
+import com.example.hrms_backend.dto.EmployeeFetchDto;
 import com.example.hrms_backend.dto.EmployeeProfileUpdate;
+import com.example.hrms_backend.entities.Employee;
 import com.example.hrms_backend.services.EmployeeService;
+import com.example.hrms_backend.utils.SecurityUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -60,10 +63,26 @@ public class EmployeeController {
     }
 
     // Update game preference by login user
-    @PatchMapping("/api/common/employee/{employeeId}")
+    @PatchMapping("/api/employee/{employeeId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> employeeProfileUpdate(@PathVariable UUID employeeId, @Valid @RequestBody EmployeeProfileUpdate profileUpdateDto){
         employeeService.updateSelfProfile(employeeId, profileUpdateDto);
         return ResponseEntity.noContent().build();
+    }
+
+    // Get Current Employee
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/api/employee/me")
+    public ResponseEntity<EmployeeFetchDto> getMyCurrentEmployee(){
+        Employee employee = employeeService.getCurrentEmployee();
+        String role = SecurityUtils.getRole();
+
+        EmployeeFetchDto fetchDto = new EmployeeFetchDto();
+        fetchDto.setEmployeeId(employee.getEmployeeId());
+        fetchDto.setName(employee.getName());
+        fetchDto.setEmail(employee.getEmail());
+        fetchDto.setRole(role);
+
+        return ResponseEntity.ok(fetchDto);
     }
 }

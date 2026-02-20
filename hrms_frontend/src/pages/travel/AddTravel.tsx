@@ -16,15 +16,15 @@ const AddTravel = () => {
     }
   });
 
-  const {data: employees = [], isLoading} = useGetActiveEmployee();
+  const { data: employees = [], isLoading } = useGetActiveEmployee();
 
-  const { mutate: createTravel, isPending} = useCreateTravel();
+  const { mutate: createTravel, isPending } = useCreateTravel();
 
   const onSubmit = (data: CreateTravelRequest) => {
     createTravel(data);
   }
 
-  if(isPending || isLoading){
+  if (isPending || isLoading) {
     <Loading />
   }
 
@@ -36,7 +36,7 @@ const AddTravel = () => {
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <Sidebar />
+        {/* <Sidebar /> */}
 
         {/* Page Content */}
         <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
@@ -112,7 +112,7 @@ const AddTravel = () => {
               <button
                 type="submit"
                 className="w-full p-2 rounded font-medium transition bg-purple-600 hover:bg-purple-500">
-                + Add Travel 
+                + Add Travel
               </button>
             </div >
           </form >

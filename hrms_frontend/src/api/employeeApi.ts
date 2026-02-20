@@ -9,3 +9,9 @@ Promise<MultipleActiveEmployee[]> => {
     console.log("api response",res.data);
     return res.data;
 }
+
+// Fetch current employee Id
+export const fetchMyEmployeeId = async () =>{
+    const res = await api.get(`/api/employee/me`);
+    return res.data;
+}

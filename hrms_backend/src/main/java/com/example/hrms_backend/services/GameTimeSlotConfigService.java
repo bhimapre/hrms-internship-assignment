@@ -17,6 +17,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -54,7 +55,7 @@ public class GameTimeSlotConfigService {
     }
 
     // Update game time slot config
-    public GameTimeSlotConfigDto updateGameTimeSlotConfig(UUID gameId, GameTimeSlotConfigDto gameTimeSlotConfigDto){
+    public GameTimeSlotConfigDto updateGameTimeSlotConfig(UUID configId, GameTimeSlotConfigDto gameTimeSlotConfigDto){
 
         UUID userId = SecurityUtils.getCurrentUserId();
         String role = SecurityUtils.getRole();
@@ -65,7 +66,7 @@ public class GameTimeSlotConfigService {
             throw new AccessDeniedException("You have no access of it");
         }
 
-        GameTimeSlotConfig config = configRepo.findByGame_GameId(gameId).orElseThrow(() -> new ResourceNotFoundException("Time Slot config not found for this game"));
+        GameTimeSlotConfig config = configRepo.findById(configId).orElseThrow(() -> new ResourceNotFoundException("Time Slot config not found for this game"));
 
         config.setConfigStartTime(gameTimeSlotConfigDto.getConfigStartTime());
         config.setConfigEndTime(gameTimeSlotConfigDto.getConfigEndTime());
@@ -76,5 +77,41 @@ public class GameTimeSlotConfigService {
 
         GameTimeSlotConfig saved = configRepo.save(config);
         return modelMapper.map(saved, GameTimeSlotConfigDto.class);
+    }
+
+    // Find game config by id
+    public GameTimeSlotConfigDto findGameConfigById(UUID configId){
+        String role = SecurityUtils.getRole();
+
+        if(!role.equals("HR")){
+            throw new AccessDeniedException("You have no access of it");
+        }
+
+        GameTimeSlotConfig timeSlotConfig = configRepo.findById(configId).orElseThrow(() -> new ResourceNotFoundException("Game Config not found"));
+
+        return modelMapper.map(timeSlotConfig, GameTimeSlotConfigDto.class);
+    }
+
+    // Get All game config
+    public List<GameTimeSlotConfigDto> getAllGameConfig(){
+        String role = SecurityUtils.getRole();
+
+        if(!role.equals("HR")){
+            throw new AccessDeniedException("You have no access of it");
+        }
+
+        List<GameTimeSlotConfig> configs = configRepo.findAll();
+
+
+        return  configs.stream()
+                .map(c -> {
+                    GameTimeSlotConfigDto dto = modelMapper.map(c, GameTimeSlotConfigDto.class);
+
+                    dto.setGameId(c.getGame().getGameId());
+                    dto.setGameName(c.getGame().getGameName());
+                    return dto;
+                })
+                .toList();
+
     }
 }

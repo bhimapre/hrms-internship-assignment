@@ -6,16 +6,21 @@ import { useParams } from "react-router-dom";
 import { useGetTravelById } from "../../hooks/travel/useGetTravelById";
 import { useAssignEmployeesTravel } from "../../hooks/employee/useGetAssignEmployeesTravel";
 import { useFetchAllBasedOnTravelAndHR } from "../../hooks/travel document/useFetchAllBasedOnTravelAndHR";
+import { useAssignEmployees } from "../../hooks/employee/useAssignEmployees";
 
 export default function TravelDetails() {
 
-  const { travelId } = useParams();
+  const { travelId } = useParams<{travelId: string}>();
+  if(!travelId){
+    return <Typography color="error">Invalid travel</Typography>
+  }
 
   const travelQuery = useGetTravelById(travelId!);
 
   const assignEmployeesTravel = useAssignEmployeesTravel(travelId!);
 
   const hrDocumentsQuery = useFetchAllBasedOnTravelAndHR(travelId!);
+
 
   return (
     <Box sx={{ p: 4 }}>
@@ -36,7 +41,7 @@ export default function TravelDetails() {
       </Card>
 
       {/* Assigned Employees */}
-      <AssignedEmployees employees={assignEmployeesTravel.data ?? []}/>
+      <AssignedEmployees employees={assignEmployeesTravel.data ?? []} />
 
       {/* Travel Documents */}
       {hrDocumentsQuery.isLoading ? (<Typography> Loading....</Typography>) : (

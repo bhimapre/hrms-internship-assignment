@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Navbar from '../../components/Navbar'
 import { useForm } from 'react-hook-form'
 import Sidebar from '../../components/Sidebar';
@@ -19,6 +19,8 @@ const AddJobOpening = () => {
 
   // Use Form Hook
   const { register, formState: { errors }, handleSubmit } = useForm<JobOpeningInterface>();
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   // Custom Hook Calling 
   const { mutate, isPending } = useAddJobopening();
@@ -57,7 +59,7 @@ const AddJobOpening = () => {
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        {/* <Sidebar /> */}
+        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed}/>
 
         {/* Page Content */}
         <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

@@ -22,7 +22,6 @@ public class JobReferralDto {
     @Size(min = 7, max =  50, message = "Email must be between 7 and 50 characters long")
     private String email;
 
-//    @Pattern(regexp = "^[6-9]\\\\d{9}$", message = "Invalid phone number format")
     @NotBlank(message = "Phone Number is required")
     @Size(min = 10, max =  10, message = "Phone Number size must be 10 digits")
     private String phoneNumber;
