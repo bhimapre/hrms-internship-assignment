@@ -1,11 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Edit } from 'lucide-react'
 import Navbar from '../../components/Navbar'
 import { useFetchAllGameConfig } from '../../hooks/game config/useFetchAllGameConfig';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../../components/Loading';
+import Sidebar from '../../components/Sidebar';
 
 const AllGameConfig = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const { data, isLoading, isError } = useFetchAllGameConfig();
     const navigate = useNavigate();
@@ -26,8 +29,8 @@ const AllGameConfig = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+                
                 {/* Main Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">

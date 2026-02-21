@@ -27,4 +27,7 @@ public interface GameBookingRepo extends JpaRepository<GameBooking, UUID> {
     List<GameBooking> findByBooker_EmployeeIdAndTimeSlot_SlotDateGreaterThanEqual(UUID employeeId, LocalDate date);
 
     boolean existsByBooker_EmployeeIdAndTimeSlot_SlotDateAndTimeSlot_StartTimeLessThanAndTimeSlot_EndTimeGreaterThan(UUID employeeId, LocalDate slotDate, LocalTime endTime, LocalTime startTime);
+
+    boolean existsByBooker_EmployeeIdAndTimeSlot_TimeSlotId(UUID employeeId, UUID timeSlotId);
+
 }

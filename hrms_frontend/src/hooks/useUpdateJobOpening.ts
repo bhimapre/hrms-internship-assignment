@@ -14,7 +14,7 @@ export const useUpdateJobOpening = () => {
         },
 
         onError: (err: any) => {
-            toast.error(err?.res?.data?.message || "Failed to update job opening");
+            toast.error(err?.response?.data?.message || "Failed to update job opening");
         }
     });
 }

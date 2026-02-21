@@ -17,7 +17,7 @@ export const useApproveExpense = () => {
         },
 
         onError: (err: any) => {
-            toast.error(err?.res?.data?.message || "Failed to approved Travel expense");
+            toast.error(err?.response?.data?.message || "Failed to approved Travel expense");
         },
     });
 }

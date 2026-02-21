@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import type { UpdateTravelExpense } from '../../types/TravelExpense';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
@@ -8,8 +8,11 @@ import { useUpdateTravelExpnese } from '../../hooks/travelExpense/useUpdateTrave
 import { useGetTravelExpense } from '../../hooks/travelExpense/useGetTravelExpense';
 import Loading from '../../components/Loading';
 import Navbar from '../../components/Navbar';
+import Sidebar from '../../components/Sidebar';
 
 const UpdateExpense = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const { expenseId } = useParams<{ expenseId: string }>();
 
@@ -19,22 +22,22 @@ const UpdateExpense = () => {
     const { register, handleSubmit, formState: { errors }, reset } = useForm<UpdateTravelExpense>();
 
     const onSubmit = (data: UpdateTravelExpense) => {
-    if (!expenseId) {
-      return <div> Travel Id not found </div>
+        if (!expenseId) {
+            return <div> Travel Id not found </div>
+        }
+
+        updateExpense({ expenseId, data });
     }
 
-    updateExpense({ expenseId, data });
-  }
+    useEffect(() => {
+        if (expenseData) {
+            reset(expenseData);
+        }
+    }, [expenseData, reset]);
 
-  useEffect(() => {
-    if (expenseData) {
-      reset(expenseData);
+    if (isLoading) {
+        return <Loading />
     }
-  }, [expenseData, reset]);
-
-  if (isLoading) {
-    return <Loading />
-  }
 
     return (
         <div className="flex flex-col h-screen">
@@ -44,7 +47,7 @@ const UpdateExpense = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

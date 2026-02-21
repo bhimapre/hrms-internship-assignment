@@ -13,7 +13,7 @@ export const useUpdateTravel = () => {
         },
 
         onError: (err: any) => {
-            toast.error(err?.res?.data?.message || "Failed to update Travel");
+            toast.error(err?.response?.data?.message || "Failed to update Travel");
         }
     });
 }

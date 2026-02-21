@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useForm } from 'react-hook-form';
@@ -13,28 +13,30 @@ type FileForm = {
 
 const UpdateJDFileJobOpening = () => {
 
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
     // Fetch Job Opening Id From Params
-    const { jobOpeningId } = useParams<{jobOpeningId: string}>();
+    const { jobOpeningId } = useParams<{ jobOpeningId: string }>();
 
     // Update File Job Opening
-    const{ mutate: updateFile, isPending} = useUpdateFileJobOpening();
+    const { mutate: updateFile, isPending } = useUpdateFileJobOpening();
 
     // Fetch Values and Handle Using Use Form Hook
     const { register, formState: { errors }, handleSubmit } = useForm<FileForm>();
 
     // On Submit Job Opening
     const onSubmit = (data: FileForm) => {
-        if(!jobOpeningId){
+        if (!jobOpeningId) {
             toast.error("Job opening Id not found");
             return;
         }
 
         const file = data.file[0];
-        updateFile({jobOpeningId, file});
+        updateFile({ jobOpeningId, file });
     }
 
     // Loading
-    if(isPending){
+    if (isPending) {
         <Loading />
     }
 
@@ -46,8 +48,8 @@ const UpdateJDFileJobOpening = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                <Sidebar />
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+                
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">

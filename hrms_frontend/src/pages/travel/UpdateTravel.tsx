@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Sidebar from '../../components/Sidebar'
 import Navbar from '../../components/Navbar'
 import { useParams } from 'react-router-dom';
@@ -9,6 +9,8 @@ import type { UpdateTravelRequest } from '../../types/Travel';
 import Loading from '../../components/Loading';
 
 const UpdateTravel = () => {
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const { travelId } = useParams<{ travelId: string }>();
 
@@ -44,8 +46,8 @@ const UpdateTravel = () => {
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        {/* <Sidebar /> */}
-
+        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+        
         {/* Page Content */}
         <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
           <div className="text-center mt-8 mb-8">

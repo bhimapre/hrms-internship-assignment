@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useUpdateJobReferral } from '../../hooks/jobReferral/useUpdateJobReferral';
 import { useGetJobReferralById } from '../../hooks/jobReferral/useGetJobReferralById';
@@ -6,9 +6,11 @@ import { useForm } from 'react-hook-form';
 import type { FetchAllJobReferrals } from '../../types/JobReferral';
 import Loading from '../../components/Loading';
 import Navbar from '../../components/Navbar';
-import { Sidebar } from 'lucide-react';
+import Sidebar from '../../components/Sidebar';
 
 const UpdateJobReferral = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const { jobReferralId } = useParams<{jobReferralId: string}>();
     console.log(jobReferralId);
@@ -44,7 +46,7 @@ const UpdateJobReferral = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                <Sidebar />
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

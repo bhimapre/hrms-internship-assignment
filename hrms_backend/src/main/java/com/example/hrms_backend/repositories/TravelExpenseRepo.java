@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -23,6 +24,15 @@ public interface TravelExpenseRepo extends JpaRepository<TravelExpense, UUID> {
     List<TravelExpense> findByTravel_TravelId(UUID travelTravelId);
 
     List<TravelExpense> findByTravel_TravelIdAndEmployee_EmployeeId(UUID travelTravelId, UUID employeeEmployeeId);
+
+    @Query("""
+    SELECT COALESCE(SUM(e.expenseAmount),0)
+    FROM TravelExpense e 
+    WHERE e.travel.travelId = :travelId
+    AND e.expenseStatus = 'APPROVED'
+""")
+    BigDecimal getTotalExpenseApprovedAmount(@Param("travelId") UUID travelID);
+
 
     @Query("""
     SELECT te FROM TravelExpense te

@@ -11,7 +11,7 @@ export const useSubmitExpense = () =>{
         },
 
         onError: (err:any) => {
-            toast.error(err?.res?.data?.message || "Something went wrong");
+            toast.error(err?.response?.data?.message || "Something went wrong");
         }
     })
 }

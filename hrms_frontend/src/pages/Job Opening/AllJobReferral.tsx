@@ -10,6 +10,8 @@ import { useDeleteJobReferral } from '../../hooks/jobReferral/useDeleteJobReferr
 
 const AllJobReferral = () => {
 
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
     const [page, setPage] = useState<number>(0);
     const { data, isLoading, isError } = useGetAllJobReferrals(page, 5);
     const navigate = useNavigate();
@@ -31,8 +33,8 @@ const AllJobReferral = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+                
                 {/* Main Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">
@@ -59,7 +61,6 @@ const AllJobReferral = () => {
                                         </div>
                                     </div>
 
-                                    {/* View Button */}
                                     <div className="flex flex-col sm:flex-row gap-2 sm:ml-4 w-full sm:w-auto">
                                         {/* Update & Delete Button */}
                                         <>

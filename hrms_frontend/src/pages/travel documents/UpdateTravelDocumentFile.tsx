@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { useUpdateTravelDocumentFile } from '../../hooks/travel document/useUpdateTravelDocumentFile';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
 import Navbar from '../../components/Navbar';
+import Sidebar from '../../components/Sidebar';
 
 type FileForm = {
     file: FileList;
@@ -12,23 +13,25 @@ type FileForm = {
 
 const UpdateTravelDocumentFile = () => {
 
-    const { travelDocumentId } = useParams<{travelDocumentId: string}>();
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
-    const{ mutate: updateFile, isPending} = useUpdateTravelDocumentFile();
+    const { travelDocumentId } = useParams<{ travelDocumentId: string }>();
+
+    const { mutate: updateFile, isPending } = useUpdateTravelDocumentFile();
 
     const { register, formState: { errors }, handleSubmit } = useForm<FileForm>();
 
     const onSubmit = (data: FileForm) => {
-        if(!travelDocumentId){
+        if (!travelDocumentId) {
             toast.error("docuemnt Id not found");
             return;
         }
 
         const file = data.file[0];
-        updateFile({travelDocumentId, file});
+        updateFile({ travelDocumentId, file });
     }
 
-    if(isPending){
+    if (isPending) {
         <Loading />
     }
 
@@ -40,8 +43,7 @@ const UpdateTravelDocumentFile = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">

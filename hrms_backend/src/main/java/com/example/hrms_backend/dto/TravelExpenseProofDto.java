@@ -14,4 +14,5 @@ public class TravelExpenseProofDto {
     @NotNull(message = "file url is required")
     private String expenseFileUrl;
     private UUID travelExpenseId;
+    private UUID uploadedBy;
 }

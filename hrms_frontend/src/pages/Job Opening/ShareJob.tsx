@@ -1,17 +1,19 @@
-import { Sidebar } from 'lucide-react';
-import React from 'react'
+import React, { useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import Navbar from '../../components/Navbar';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCreateJobShare } from '../../hooks/jobShare/useCreateJobShare';
 import { toast } from 'react-toastify';
 import Loading from '../../components/Loading';
+import Sidebar from '../../components/Sidebar';
 
 export interface ShareEmails {
     emails: { email: string }[];
 }
 
 const ShareJob = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const { jobOpeningId } = useParams<{ jobOpeningId: string }>();
     const navigate = useNavigate();
@@ -65,8 +67,7 @@ const ShareJob = () => {
                 <Navbar />
 
                 <div className="flex flex-1 overflow-hidden">
-                    <Sidebar />
-
+                    <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
                     <main className="flex-1 overflow-y-auto p-6 max-w-3xl mx-auto">
                         <h1 className="text-3xl font-bold text-center mb-6">Share Job Opening</h1>
 

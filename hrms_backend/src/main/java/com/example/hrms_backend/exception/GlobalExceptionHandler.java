@@ -48,8 +48,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleall(Exception e){
-        String message = e.getMessage();
-        return message;
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, Object> handleAll (Exception ex){
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", 500);
+        response.put("error", "Internal Server Error");
+        response.put("message", ex.getMessage());
+        return response;
     }
 }

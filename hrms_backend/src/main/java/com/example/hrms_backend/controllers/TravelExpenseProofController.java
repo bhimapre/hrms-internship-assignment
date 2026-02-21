@@ -33,4 +33,11 @@ public class TravelExpenseProofController {
         TravelExpenseProofDto expenseProofDto = travelExpenseProofService.updateExpenseProof(expenseProofId, file);
         return new ResponseEntity(expenseProofDto, HttpStatus.OK);
     }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/{expenseId}")
+    public ResponseEntity<TravelExpenseProofDto> findExpenseProofById(@PathVariable UUID expenseId){
+        TravelExpenseProofDto expenseProofDto = travelExpenseProofService.getExpenseProof(expenseId);
+        return ResponseEntity.ok(expenseProofDto);
+    }
 }

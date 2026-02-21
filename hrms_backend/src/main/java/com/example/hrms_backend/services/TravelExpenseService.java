@@ -18,10 +18,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.lang.module.ResolutionException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -315,5 +318,10 @@ public class TravelExpenseService {
         return expense.stream()
                 .map(t -> modelMapper.map(t, TravelExpenseDto.class))
                 .toList();
+    }
+
+    // Get Total Expense Approved Amount
+    public BigDecimal getTotalExpenseApprovedAmount(UUID travelId){
+        return travelExpenseRepo.getTotalExpenseApprovedAmount(travelId);
     }
 }

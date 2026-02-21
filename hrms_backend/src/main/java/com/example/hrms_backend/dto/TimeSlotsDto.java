@@ -30,4 +30,5 @@ public class TimeSlotsDto {
 
     @NotNull(message = "End Time is required")
     private LocalTime endTime;
+    private String status;
 }

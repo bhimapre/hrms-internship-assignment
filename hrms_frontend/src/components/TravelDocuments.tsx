@@ -9,6 +9,7 @@ interface Props {
 export default function TravelDocuments({ documents = [] }: Props) {
 
   const travelId = useParams();
+  console.log(travelId);
   const role = localStorage.getItem("role");
   const navigate = useNavigate();
 

@@ -1,16 +1,19 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { data, useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAddTravelExpenseProof } from '../../hooks/travel expense proof/useAddTravelExpenseProof';
 import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar';
 import { useSubmitExpense } from '../../hooks/travelExpense/useSubmitExpense';
+import Sidebar from '../../components/Sidebar';
 
 type FormValues = {
     file: FileList;
 }
 
 const AddExpenseProof = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const params = useParams<{ expenseId: string }>();
     const expenseId = params.expenseId!;
@@ -56,16 +59,16 @@ const AddExpenseProof = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+                
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">
-                        <h1 className="text-4xl font-bold text-center text-white mb-4">Update Travel Document File</h1>
+                        <h1 className="text-4xl font-bold text-center text-white mb-4">Add Expense Proof</h1>
                     </div>
                     <form
                         onSubmit={handleSubmit(onUpload)}
-                        className={`grid grid-cols-1 md:grid-cols-2 gap-4 bg-neutral-900 p-4 sm:p-6 rounded-lg shadow-lg`}>
+                        className={`grid grid-cols-1 md:grid-cols-1 gap-4 bg-neutral-900 p-4 sm:p-6 rounded-lg shadow-lg`}>
 
                         {/* Document File */}
                         <div>
@@ -91,7 +94,7 @@ const AddExpenseProof = () => {
                     </form >
                     <button
                         onClick={onFinalSubmit}
-                        className="min-w-full p-2 rounded font-medium transition bg-purple-600 hover:bg-purple-500">
+                        className="min-w-full py-2.5 rounded font-medium transition bg-green-600 hover:bg-green-500">
                         + Submit Expense
                     </button>
                 </main>

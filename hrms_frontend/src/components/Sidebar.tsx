@@ -1,30 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ChevronDown,
-  ChevronRight,
-  Menu,
-  X,
-  User,
-  BriefcaseBusiness,
-  FileUser,
-  HatGlasses,
-  HandCoins,
-  Speech,
-  BadgeCheck,
-  DockIcon,
-  University,
-  IdCardLanyard,
-  GraduationCap,
-  Footprints,
-  Gamepad,
-  Car,
-  TreePine
-} from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, X, BriefcaseBusiness, Gamepad, Car, TreePine } from "lucide-react";
 
 const Sidebar = ({ isCollapsed, setIsCollapsed }: { isCollapsed: any, setIsCollapsed: any }) => {
 
   const [openItem, setOpenItem] = useState(null);
+  const role = localStorage.getItem("role");
 
   const items = [
     {
@@ -33,6 +14,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: { isCollapsed: any, setIsColla
       children: [
         { name: "Game", path: "/games" },
         { name: "My Booking", path: "/game/my-booking" },
+        { name: "All Games", path: "/hr/game", roles: "HR" },
+        { name: "Add Games", path: "/hr/game/add", roles: "HR" },
+        { name: "All Game Config", path: "/hr/game-config", roles: "HR" },
+        { name: "Add Game Config", path: "/hr/game-config/add", roles: "HR" },
       ],
     },
     {
@@ -40,6 +25,10 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: { isCollapsed: any, setIsColla
       icon: <BriefcaseBusiness size={20} />,
       children: [
         { name: "JobOpenings", path: "/job-openings" },
+        { name: "Job Referral", path: "/hr/job-referral", roles: "HR" },
+        { name: "All Job Referral", path: "/hr/job-referral", roles: "HR" },
+        { name: "HR Job Opening", path: "/hr/job-opening", roles: "HR" },
+        { name: "Add Job Opening", path: "/job-opening/add", roles: "HR" },
       ],
     },
     {
@@ -47,13 +36,14 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: { isCollapsed: any, setIsColla
       icon: <Car size={20} />,
       children: [
         { name: "Travel", path: "/travel-list" },
+        { name: "Add Travel", path: "/hr/travel-opening/add", roles: "HR" },
       ],
     },
     {
-      title: "Travel",
+      title: "Organization Chart",
       icon: <TreePine size={20} />,
       children: [
-        { name: "Organization chart", path: "/chart" },
+        { name: "Organization chart", path: "/org-chart" },
       ],
     },
   ];
@@ -99,7 +89,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: { isCollapsed: any, setIsColla
 
             {!isCollapsed && openItem === index && (
               <ul className="ml-8 mt-1 space-y-1 text-sm text-neutral-400">
-                {item.children.map((child, i) => (
+                {item.children.filter(child => !child.roles || child.roles.includes(role!)).map((child, i) => (
                   <li key={i}>
                     <Link
                       to={child.path}

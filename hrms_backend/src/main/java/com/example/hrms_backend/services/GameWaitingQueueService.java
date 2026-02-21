@@ -58,14 +58,10 @@ public class GameWaitingQueueService {
 
         GameWaitingQueue waitingQueue = new GameWaitingQueue();
 
-        // If time slot is empty and booker never played or booked particular game then show message that directly book the slot
-        boolean isTimeSlotExist = bookingRepo.existsByTimeSlot_TimeSlotId(waitingQueueDto.getTimeSlotId());
-        if(!isTimeSlotExist) {
-            LocalDate today = LocalDate.now();
-            boolean isBookerPlayedGameToday = bookingRepo.existsByBooker_EmployeeIdAndGame_GameIdAndTimeSlot_SlotDate(employeeId, waitingQueueDto.getGameId(), today);
-            if (!isBookerPlayedGameToday) {
-                throw new BadRequestException("The slot is empty you can directly book that");
-            }
+        // If booker already booked same slots
+        boolean alreadyBookedSameSlot = bookingRepo.existsByBooker_EmployeeIdAndTimeSlot_TimeSlotId(employeeId, slot.getTimeSlotId());
+        if(alreadyBookedSameSlot){
+            throw new BadRequestException("You already have booked this slot for other games");
         }
 
         waitingQueue.setTimeSlot(slot);

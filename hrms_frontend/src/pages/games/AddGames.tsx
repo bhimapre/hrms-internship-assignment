@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { GameBase } from '../../types/Game';
 import Navbar from '../../components/Navbar';
 import { useCreateGame } from '../../hooks/game/useCreateGame';
 import Loading from '../../components/Loading';
+import Sidebar from '../../components/Sidebar';
 
 const AddGames = () => {
 
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const { register, handleSubmit, formState: { errors } } = useForm<GameBase>();
 
     const { mutate: createGame, isPending } = useCreateGame();
@@ -15,7 +17,7 @@ const AddGames = () => {
         createGame(data);
     }
 
-    if(isPending){
+    if (isPending) {
         return <Loading />
     }
 
@@ -27,8 +29,7 @@ const AddGames = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">
