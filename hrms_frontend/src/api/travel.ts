@@ -2,8 +2,8 @@ import type { CreateTravelRequest, GetAllTravels, PageResponse, UpdateTravelRequ
 import api from "./axios";
 
 
-export const createTravelApi = async(data: CreateTravelRequest):
-Promise<any> => {
+export const createTravelApi = async (data: CreateTravelRequest):
+    Promise<any> => {
     const res = await api.post(`/api/hr/travels`, data)
     return res.data;
 }

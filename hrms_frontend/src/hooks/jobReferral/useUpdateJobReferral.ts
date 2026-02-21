@@ -14,7 +14,7 @@ export const useUpdateJobReferral = () => {
         },
 
         onError: (err: any) => {
-            toast.error(err?.res?.data?.message || "Failed to update job referral");
+            toast.error(err?.response?.data?.message || "Failed to update job referral");
         }
     });
 }

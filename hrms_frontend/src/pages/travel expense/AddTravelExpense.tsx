@@ -1,12 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { TravelExpenseBase } from '../../types/TravelExpense';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCreateTravelExpense } from '../../hooks/travelExpense/useCreateTravelExpense';
 import Navbar from '../../components/Navbar';
 import { toast } from 'react-toastify';
+import Sidebar from '../../components/Sidebar';
 
 const AddTravelExpense = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const navigate = useNavigate();
 
@@ -37,8 +40,8 @@ const AddTravelExpense = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+                
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">

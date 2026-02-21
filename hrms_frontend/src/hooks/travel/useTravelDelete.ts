@@ -17,7 +17,7 @@ export const useTravelDelete = () => {
         },
 
         onError: (err: any) => {
-            toast.error(err?.res?.data?.message || "Somthing went wrong");
+            toast.error(err?.response?.data?.message || "Somthing went wrong");
         }
     })
 

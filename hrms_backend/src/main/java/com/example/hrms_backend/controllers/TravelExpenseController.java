@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -44,7 +45,7 @@ public class TravelExpenseController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasRole('HR')")
+    @PreAuthorize("hasAuthority('HR')")
     @PutMapping("api/hr/expense/reject/{expenseId}")
     public ResponseEntity<Void> rejectExpense(@PathVariable UUID expenseId, @RequestParam String remark){
         travelExpenseService.rejectExpense(expenseId, remark);
@@ -106,5 +107,12 @@ public class TravelExpenseController {
     @GetMapping("/api/travel-expense/{travelId}/{employeeId}")
     public ResponseEntity<List<TravelExpenseDto>> getExpenseByTravelIdAndEmployeeId(@PathVariable UUID travelId, @PathVariable UUID employeeId){
         return ResponseEntity.ok(travelExpenseService.getAllExpenseByTravelIdAndEmployeeId(travelId, employeeId));
+    }
+
+    // Get Total Travel Expense Amount
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/api/travel-expense/total/{travelId}")
+    public ResponseEntity<BigDecimal> getApprovedTotalAmount(@PathVariable UUID travelId){
+        return ResponseEntity.ok(travelExpenseService.getTotalExpenseApprovedAmount(travelId));
     }
 }

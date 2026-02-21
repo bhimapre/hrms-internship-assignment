@@ -21,4 +21,6 @@ public interface GameBookingMemberRepo extends JpaRepository<BookingMember, UUID
     List<BookingMember> findByGameBooking_GameBookingId(UUID gameBookingId);
 
     List<BookingMember> findByEmployee_EmployeeIdAndTimeSlot_SlotDateGreaterThanEqual(UUID employeeId, LocalDate date);
+
+    boolean existsByEmployee_EmployeeIdInAndTimeSlot_SlotDateAndTimeSlot_StartTimeLessThanAndTimeSlot_EndTimeGreaterThan(List<UUID> employeeIds, LocalDate slotDate, LocalTime endTime, LocalTime startTime);
 }

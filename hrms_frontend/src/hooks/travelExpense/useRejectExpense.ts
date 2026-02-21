@@ -1,4 +1,4 @@
-import { QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { rejectTravelExpenseApi } from "../../api/travelExpenseApi";
 import { toast } from "react-toastify";
 
@@ -17,7 +17,7 @@ export const useRejectExpense = () => {
         },
 
         onError: (err: any) => {
-            toast.error(err?.res?.data?.message || "Failed to reject Travel expense");
+            toast.error(err?.response?.data?.message || "Failed to reject Travel expense");
         },
     });
 }

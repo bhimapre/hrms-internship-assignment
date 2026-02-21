@@ -43,25 +43,32 @@ public class TimeSlotController {
         return ResponseEntity.ok("Time slots generated successfully");
     }
 
-    // Get time slots based on game id and date
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/api/game-slots/{gameId}")
-    public ResponseEntity<List<TimeSlotsDto>> getSlotsByDate(
-            @PathVariable UUID gameId,
-            @RequestParam LocalDate date
-    ) {
-        List<TimeSlotsDto> slots = timeSlotRepo
-                .findSlotsByGameAndDate(gameId, date)
-                .stream()
-                .map(slot -> new TimeSlotsDto(
-                        slot.getTimeSlotId(),
-                        slot.getGame().getGameId(),
-                        slot.getSlotDate(),
-                        slot.getStartTime(),
-                        slot.getEndTime()
-                ))
-                .toList();
+//    // Get time slots based on game id and date
+//    @PreAuthorize("isAuthenticated()")
+//    @PostMapping("/api/game-slots/{gameId}")
+//    public ResponseEntity<List<TimeSlotsDto>> getSlotsByDate(
+//            @PathVariable UUID gameId,
+//            @RequestParam LocalDate date
+//    ) {
+//        List<TimeSlotsDto> slots = timeSlotRepo
+//                .findSlotsByGameAndDate(gameId, date)
+//                .stream()
+//                .map(slot -> new TimeSlotsDto(
+//                        slot.getTimeSlotId(),
+//                        slot.getGame().getGameId(),
+//                        slot.getSlotDate(),
+//                        slot.getStartTime(),
+//                        slot.getEndTime()
+//                ))
+//                .toList();
+//
+//        return ResponseEntity.ok(slots);
+//    }
 
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/api/game-slots/{gameId}")
+    public ResponseEntity<List<TimeSlotsDto>> getTodayTimeSlotsByGame(@PathVariable UUID gameId){
+        List<TimeSlotsDto> slots = timeSlotService.getTodaySlotsByGame(gameId);
         return ResponseEntity.ok(slots);
     }
 }

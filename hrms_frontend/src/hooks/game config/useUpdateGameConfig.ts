@@ -13,7 +13,7 @@ export const useUpdateGameConfig = () => {
         },
 
         onError: (err: any) => {
-            toast.error(err?.res?.data?.message || "Failed to update Game");
+            toast.error(err?.response?.data?.message || "Failed to update Game");
         }
     });
 }

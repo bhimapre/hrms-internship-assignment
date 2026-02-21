@@ -13,6 +13,7 @@ Promise<AssignEmployeeTravel[]> => {
     return res.data;
 }
 
+// Fetch Mananger Assign EMployee Travels
 export const fetchManagerAssignedEmployee = async():
 Promise<AssignEmployeeTravel[]> => {
     const res = await api.get(`/api/travel/manager/assigned`);

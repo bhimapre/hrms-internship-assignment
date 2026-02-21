@@ -39,7 +39,12 @@ import AllGameConfig from './pages/game config/AllGameConfig.tsx';
 import AddGameConfig from './pages/game config/AddGameConfig.tsx';
 import UpdateGameConfig from './pages/game config/UpdateGameConfig.tsx';
 import UpdateGame from './pages/games/UpdateGame.tsx';
-import ShowGamesForTimeSlot from './pages/games/ShowGamesForTimeSlot.tsx';
+import ExpenseProof from './pages/expense proofs/ExpenseProof.tsx';
+import UpdateExpenseProof from './pages/expense proofs/UpdateExpenseProof.tsx';
+import OrgChart from './pages/org chart/OrgChart.tsx';
+import ShowGameBookingTimeSlot from './pages/games/ShowGameBookingTimeSlot.tsx';
+import TimeSlotCreation from './pages/time slot/TimeSlotCreation.tsx';
+import GameTimeSlot from './pages/game booking/GameTimeSlot.tsx';
 
 const router = createBrowserRouter([
   {
@@ -65,6 +70,10 @@ const router = createBrowserRouter([
   {
     path: "/job-opening/referral/:jobOpeningId",
     element: <ReferJob />
+  },
+  {
+    path: "/hr/job-referral",
+    element: <AllJobReferral />
   },
   {
     path: "/hr/job-opening",
@@ -143,12 +152,20 @@ const router = createBrowserRouter([
     element: <AddExpenseProof />
   },
   {
+    path: "/expense-proof/update/:expenseProofId",
+    element: <UpdateExpenseProof />
+  },
+  {
     path: "/travel-documents/add/:travelId",
     element: <AddTravelDocument />
   },
   {
     path: "/expense/update/:expenseId",
     element: <UpdateExpense />
+  },
+  {
+    path: "/expense-proof/:expenseId",
+    element: <ExpenseProof />
   },
   {
     path: "/hr/all-expenses/:travelId",
@@ -179,8 +196,20 @@ const router = createBrowserRouter([
     element: <UpdateGameConfig />
   },
   {
-    path: "/games/booking",
-    element: <ShowGamesForTimeSlot />
+    path: "/games",
+    element: <ShowGameBookingTimeSlot />
+  },
+  {
+    path: "/hr/time-slot-creation/:gameId", 
+    element: <TimeSlotCreation />
+  },
+  {
+    path: "/time-slots/:gameId",
+    element: <GameTimeSlot />
+  },
+  {
+    path: "/org-chart",
+    element: <OrgChart />
   }
 ]);
 

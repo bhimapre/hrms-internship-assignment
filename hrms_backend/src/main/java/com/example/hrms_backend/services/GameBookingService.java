@@ -35,13 +35,14 @@ public class GameBookingService {
     private final GameTimeSlotConfigRepo gameTimeSlotConfigRepo;
     private final NotificationService notificationService;
 
+    @Transactional
     public GameBookingDto createGameBooking(CreateGameBookingDto createGameBookingDto){
 
         GameBooking booking = new GameBooking();
 
         Employee employee = employeeRepo.findById(createGameBookingDto.getBookerId()).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
         TimeSlot timeSlot = timeSlotRepo.findById(createGameBookingDto.getTimeSlotId()).orElseThrow(() -> new ResourceNotFoundException("Time slot not found"));
-        Game game = gameRepo.findById(createGameBookingDto.getGameId()).orElseThrow(() -> new ResourceNotFoundException("Game is not found"));
+        Game game = timeSlot.getGame();
         GameTimeSlotConfig timeSlotConfig = gameTimeSlotConfigRepo.findByGame_GameId(game.getGameId()).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
 
 //        if(!employee.getGamePreferences().contains(game)){
@@ -93,23 +94,23 @@ public class GameBookingService {
             throw new BadRequestException("You already played this game or you already booked one slot of this game. You can join the waiting queue.");
         }
 
-//        // Check booker is already booked any time slot during this time slot
-//        boolean isBookerHaveAlreadyTimeSlotInAnotherGame = gameBookingRepo.existsByBooker_EmployeeIdAndTimeSlot_StartTimeAndTimeSlot_EndTimeAndTimeSlot_SlotDate(employee.getEmployeeId(), startTime, endTime, timeSlot.getSlotDate());
-//        if(isBookerHaveAlreadyTimeSlotInAnotherGame){
-//            throw new BadRequestException("You already have booked this slot for another game");
-//        }
+        // Check booker is already booked any time slot during this time slot
+        boolean isBookerHaveAlreadyTimeSlotInAnotherGame = gameBookingRepo.existsByBooker_EmployeeIdAndTimeSlot_SlotDateAndTimeSlot_StartTimeLessThanAndTimeSlot_EndTimeGreaterThan(employee.getEmployeeId(), timeSlot.getSlotDate(), endTime, startTime);
+        if(isBookerHaveAlreadyTimeSlotInAnotherGame){
+            throw new BadRequestException("You already have booked this slot for another game");
+        }
 
         // Check any booking member is not played particular game today
-        boolean isBookingPlayersPlayedGameToday = gameBookingMemberRepo.existsByTimeSlot_Game_GameIdAndTimeSlot_SlotDateAndEmployee_EmployeeIdIn(game.getGameId(), today, members);
+        boolean isBookingPlayersPlayedGameToday = gameBookingMemberRepo.existsByEmployee_EmployeeIdInAndTimeSlot_SlotDateAndTimeSlot_StartTimeLessThanAndTimeSlot_EndTimeGreaterThan(members, timeSlot.getSlotDate(), endTime, startTime);
         if(isBookingPlayersPlayedGameToday){
             throw new BadRequestException("Some one already played this game today");
         }
 
-//        // Check booking members are already booked any time slot during this time slot
-//        boolean isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame = gameBookingMemberRepo.existsByTimeSlot_StartTimeAndTimeSlot_EndTimeAndTimeSlot_SlotDateAndEmployee_EmployeeIdIn(startTime, endTime, timeSlot.getSlotDate(), members);
-//        if(isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame){
-//            throw new BadRequestException("Some one already played this game today");
-//        }
+        // Check booking members are already booked any time slot during this time slot
+        boolean isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame = gameBookingMemberRepo.existsByTimeSlot_StartTimeAndTimeSlot_EndTimeAndTimeSlot_SlotDateAndEmployee_EmployeeIdIn(startTime, endTime, timeSlot.getSlotDate(), members);
+        if(isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame){
+            throw new BadRequestException("Some one already played this game today");
+        }
 
         booking.setBookingStatus(BookingStatus.CONFIRMED);
         booking.setBooker(employee);

@@ -139,6 +139,10 @@ public class TravelExpenseProofService {
         return modelMapper.map(expenseProof, TravelExpenseProofDto.class);
     }
 
-
+    // Fetch Expense proof file url
+    public TravelExpenseProofDto getExpenseProof(UUID expenseId){
+        TravelExpenseProof proof = proofRepo.findByTravelExpense_TravelExpenseId(expenseId).orElseThrow(() -> new  ResourceNotFoundException("Expense Proof not found"));
+        return modelMapper.map(proof, TravelExpenseProofDto.class);
+    }
 }
 

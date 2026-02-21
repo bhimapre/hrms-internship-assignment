@@ -7,6 +7,7 @@ import com.example.hrms_backend.exception.ResourceNotFoundException;
 import com.example.hrms_backend.repositories.*;
 import com.example.hrms_backend.utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.security.Security;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,16 +30,17 @@ public class TimeSlotService {
     private final TimeSlotRepo timeSlotRepo;
     private final EmployeeRepo employeeRepo;
     private final GameBookingRepo gameBookingRepo;
+    private final ModelMapper modelMapper;
 
     @Transactional
-    public void generateSlots(UUID gameId, LocalDate fromDate, LocalDate toDate){
+    public void generateSlots(UUID gameId, LocalDate fromDate, LocalDate toDate) {
 
         UUID userId = SecurityUtils.getCurrentUserId();
         String role = SecurityUtils.getRole();
         Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
         UUID employeeId = employee.getEmployeeId();
 
-        if(!role.equals("HR")){
+        if (!role.equals("HR")) {
             throw new AccessDeniedException("You have no access of it");
         }
 
@@ -47,7 +50,7 @@ public class TimeSlotService {
         Game game = gameRepo.findById(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found"));
 
-        if(toDate.isBefore(fromDate)){
+        if (toDate.isBefore(fromDate)) {
             throw new BadRequestException("To date is not before to date");
         }
 
@@ -59,20 +62,55 @@ public class TimeSlotService {
             while (current.plusMinutes(config.getSlotDuration())
                     .compareTo(config.getConfigEndTime()) <= 0) {
                 TimeSlot slot = new TimeSlot();
-                    slot.setGame(game);
-                    slot.setSlotDate(date);
-                    slot.setStartTime(current);
-                    slot.setEndTime(current.plusMinutes(config.getSlotDuration()));
-                    slot.setCreatedAt(LocalDateTime.now());
-                    slot.setCreatedBy(employeeId);
-                try{
+                slot.setGame(game);
+                slot.setSlotDate(date);
+                slot.setStartTime(current);
+                slot.setEndTime(current.plusMinutes(config.getSlotDuration()));
+                slot.setCreatedAt(LocalDateTime.now());
+                slot.setCreatedBy(employeeId);
+                try {
                     timeSlotRepo.save(slot);
-                }
-                catch (DataIntegrityViolationException e) {
+                } catch (DataIntegrityViolationException e) {
                 }
 
                 current = current.plusMinutes(config.getSlotDuration());
             }
         }
+    }
+
+    private TimeSlotsDto map(TimeSlot slot, String status) {
+        TimeSlotsDto timeSlotsDto = modelMapper.map(slot, TimeSlotsDto.class);
+
+        timeSlotsDto.setGameId(slot.getGame().getGameId());
+        timeSlotsDto.setStatus(status);
+        return timeSlotsDto;
+    }
+
+    // Get today time slot for game with status
+    public List<TimeSlotsDto> getTodaySlotsByGame(UUID gameId) {
+
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        List<TimeSlot> slots = timeSlotRepo.findSlotsByGameAndDate(gameId, today);
+
+        List<TimeSlotsDto> response = new ArrayList<>();
+
+        for (TimeSlot slot : slots) {
+            boolean isPast = slot.getStartTime().isBefore(now);
+            if (isPast) {
+                response.add(map(slot, "PAST"));
+                continue;
+            }
+
+            boolean isBooked = gameBookingRepo.existsByTimeSlot_TimeSlotId(slot.getTimeSlotId());
+            if (isBooked) {
+                response.add(map(slot, "BOOKED"));
+                continue;
+            }
+
+            response.add(map(slot, "AVAILABLE"));
+        }
+        return response;
     }
 }

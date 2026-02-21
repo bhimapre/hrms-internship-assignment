@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useForm } from 'react-hook-form'
@@ -16,6 +16,7 @@ const AddTravel = () => {
     }
   });
 
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const { data: employees = [], isLoading } = useGetActiveEmployee();
 
   const { mutate: createTravel, isPending } = useCreateTravel();
@@ -36,7 +37,7 @@ const AddTravel = () => {
       {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        {/* <Sidebar /> */}
+        <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
         {/* Page Content */}
         <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

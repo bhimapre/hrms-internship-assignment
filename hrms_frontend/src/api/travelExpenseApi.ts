@@ -6,7 +6,7 @@ export const createTravelExpenseApi = async (travelId: string, data: TravelExpen
     return res.data;
 }
 
-// Fetch ALl documents based on travel id and employee id
+// Fetch ALl expenses based on travel id and employee id
 export const employeeTravelExpenses = async (travelId: string, employeeId: string):
     Promise<GetTravelExpenseByEmployee[]> => {
     const res = await api.get(`/api/travel-expense/${travelId}/${employeeId}`);
@@ -59,16 +59,22 @@ export const fetchHrExpenses = async (
 
 // Approve Travel Expense
 export const approveTravelExpenseApi = async (expenseId: string, remark: string) => {
-    const res = await api.put(`/api/hr/expense/approve/${expenseId}`, null,{
-        params: {remark},
+    const res = await api.put(`/api/hr/expense/approve/${expenseId}`, null, {
+        params: { remark },
     });
     return res.data;
 }
 
 // Reject Travel Expense
 export const rejectTravelExpenseApi = async (expenseId: string, remark: string) => {
-    const res = await api.put(`/api/hr/expense/reject/${expenseId}`, null,{
-        params: {remark},
+    const res = await api.put(`/api/hr/expense/reject/${expenseId}`, null, {
+        params: { remark },
     });
+    return res.data;
+}
+
+// Get Total Travel Expense Approved
+export const fetchTotalExpenseApproved = async (travelId: string) => {
+    const res = await api.get(`/api/travel-expense/total/${travelId}`);
     return res.data;
 }

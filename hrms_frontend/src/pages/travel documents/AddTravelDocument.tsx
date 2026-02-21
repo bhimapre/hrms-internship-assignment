@@ -1,17 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { AddTravelDocumentBase } from '../../types/TravelDocuments'
 import Navbar from '../../components/Navbar';
 import { useAddTravelDocument } from '../../hooks/travel document/useAddTravelDocument';
 import Loading from '../../components/Loading';
 import { useParams } from 'react-router-dom';
+import Sidebar from '../../components/Sidebar';
 
 const AddTravelDocument = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const { travelId } = useParams<{ travelId: string }>();
     if (!travelId) {
         return <div>Travel Id not found</div>
     }
+    console.log(travelId);
     const { register, handleSubmit, formState: { errors } } = useForm<AddTravelDocumentBase>();
 
     const { mutate, isPending } = useAddTravelDocument();
@@ -48,7 +52,7 @@ const AddTravelDocument = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

@@ -40,13 +40,10 @@ public class TravelExpenseProof {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
     @Column(name = "created_by")
     private UUID createdBy;
-
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
     @Column(name = "updated_by")
     private UUID updatedBy;
 }

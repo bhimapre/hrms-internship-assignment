@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Navbar from '../../components/Navbar'
 import Sidebar from '../../components/Sidebar'
 import { useParams } from 'react-router-dom';
@@ -12,6 +12,8 @@ type FileForm = {
 }
 
 const UpdateJobReferralCV = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const { jobReferralId } = useParams<{ jobReferralId: string }>();
 
@@ -41,7 +43,7 @@ const UpdateJobReferralCV = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                <Sidebar />
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

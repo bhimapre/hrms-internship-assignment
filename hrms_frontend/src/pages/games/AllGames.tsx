@@ -1,12 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Navbar from '../../components/Navbar'
 import { Edit, Trash2, Eye } from 'lucide-react'
 import { useFetchAllGames } from '../../hooks/game/useFetchAllGames';
 import { useNavigate } from 'react-router-dom';
 import Loading from '../../components/Loading';
 import { useDeleteGame } from '../../hooks/game/useDeleteGame';
+import Sidebar from '../../components/Sidebar';
 
 const AllGames = () => {
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
     const { data, isLoading, isError } = useFetchAllGames();
     const navigate = useNavigate();
     const { handleDelete } = useDeleteGame();
@@ -27,8 +30,7 @@ const AllGames = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
                 {/* Main Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">
@@ -63,7 +65,6 @@ const AllGames = () => {
                                         </div>
                                     </div>
 
-                                    {/* View Button */}
                                     <div className="flex flex-col sm:flex-row gap-2 sm:ml-4 w-full sm:w-auto">
                                         {/* Update & Delete Button */}
                                         <>
