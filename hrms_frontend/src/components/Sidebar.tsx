@@ -13,7 +13,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: { isCollapsed: any, setIsColla
       icon: <Gamepad size={20} />,
       children: [
         { name: "Game", path: "/games" },
-        { name: "My Booking", path: "/game/my-booking" },
+        { name: "My Booking", path: "/upcoming-booking" },
         { name: "All Games", path: "/hr/game", roles: "HR" },
         { name: "Add Games", path: "/hr/game/add", roles: "HR" },
         { name: "All Game Config", path: "/hr/game-config", roles: "HR" },

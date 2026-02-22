@@ -11,4 +11,6 @@ public interface GameTimeSlotConfigRepo extends JpaRepository<GameTimeSlotConfig
 
     Optional<GameTimeSlotConfig> findByGame_GameIdAndActiveTrue(UUID gameId);
     Optional<GameTimeSlotConfig> findByGame_GameId(UUID gameId);
+
+    Optional<GameTimeSlotConfig> findByGameAndActiveTrue(Game game);
 }

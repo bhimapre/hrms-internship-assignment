@@ -15,7 +15,6 @@ const AddTravelDocument = () => {
     if (!travelId) {
         return <div>Travel Id not found</div>
     }
-    console.log(travelId);
     const { register, handleSubmit, formState: { errors } } = useForm<AddTravelDocumentBase>();
 
     const { mutate, isPending } = useAddTravelDocument();

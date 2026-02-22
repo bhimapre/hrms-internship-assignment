@@ -10,6 +10,5 @@ import java.util.UUID;
 public class CreateGameBookingDto {
     private UUID timeSlotId;
     private UUID gameId;
-    private UUID bookerId;
     private List<UUID> memberIds;
 }

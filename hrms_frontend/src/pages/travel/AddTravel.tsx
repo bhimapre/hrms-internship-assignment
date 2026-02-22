@@ -104,7 +104,7 @@ const AddTravel = () => {
             </div>
 
             <div className='md:col-span-2'></div>
-            <EmployeeMultiSelect employees={employees}
+            <EmployeeMultiSelect employees={employees} name="employeeIds"
               control={control}
               error={errors.employeeIds && "Please select at least one Ids"} />
 

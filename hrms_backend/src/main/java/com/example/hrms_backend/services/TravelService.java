@@ -26,10 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.lang.module.ResolutionException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -251,12 +248,15 @@ public class TravelService {
     }
 
     // Assign Travel
+    @Transactional(readOnly = true)
     public List<AssignTravelDto> getAllAssignEmployee(){
         UUID userId = SecurityUtils.getCurrentUserId();
-        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException(EMPLOYEE_NOT_FOUND));
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
         UUID employeeId = employee.getEmployeeId();
 
-        return travelEmployeeRepo.findByEmployee_EmployeeId(employeeId)
+        List<TravelEmployee> travelEmployees = new ArrayList<>(travelEmployeeRepo.findByEmployee_EmployeeId(employeeId));
+
+        return travelEmployees
                 .stream()
                 .map(te -> {
                     Travel t = te.getTravel();

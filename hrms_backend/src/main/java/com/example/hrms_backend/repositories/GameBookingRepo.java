@@ -3,10 +3,12 @@ package com.example.hrms_backend.repositories;
 import com.example.hrms_backend.entities.GameBooking;
 import com.example.hrms_backend.entities.TimeSlot;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -30,4 +32,80 @@ public interface GameBookingRepo extends JpaRepository<GameBooking, UUID> {
 
     boolean existsByBooker_EmployeeIdAndTimeSlot_TimeSlotId(UUID employeeId, UUID timeSlotId);
 
+    @Query(
+            value = """
+            SELECT CASE 
+                WHEN EXISTS (
+                    SELECT 1
+                    FROM game_bookings gb
+                    INNER JOIN time_slots ts 
+                        ON ts.time_slot_id = gb.time_slot_id
+                    WHERE gb.booker_id = :employeeId
+                      AND gb.booking_status = 'CONFIRMED'
+                      AND ts.slot_date = :slotDate
+                      AND (
+                            DATEDIFF(SECOND, '00:00:00', ts.start_time)
+                                < DATEDIFF(SECOND, '00:00:00', :endTime)
+                        AND DATEDIFF(SECOND, '00:00:00', ts.end_time)
+                                > DATEDIFF(SECOND, '00:00:00', :startTime)
+                      )
+                )
+                THEN CAST(1 AS BIT)
+                ELSE CAST(0 AS BIT)
+            END
+            """,
+            nativeQuery = true
+    )
+    boolean existsBookerOverlappingBooking(
+            UUID employeeId,
+            LocalDate slotDate,
+            LocalTime startTime,
+            LocalTime endTime
+    );
+
+
+    @Query(
+            value = """
+        SELECT CASE
+            WHEN EXISTS (
+                SELECT 1
+                FROM game_bookings gb
+                INNER JOIN time_slots ts
+                    ON ts.time_slot_id = gb.time_slot_id
+                WHERE gb.booker_id = :employeeId
+                  AND gb.booking_status = 'CONFIRMED'
+                  AND ts.slot_date = :slotDate
+                  AND (
+                        ts.start_time < CAST(:endTime AS TIME)
+                    AND ts.end_time > CAST(:startTime AS TIME)
+                  )
+            )
+            THEN CAST(1 AS BIT)
+            ELSE CAST(0 AS BIT)
+        END
+        """,
+            nativeQuery = true
+    )
+    boolean existsBookerOverlappingWaiting(
+            UUID employeeId,
+            LocalDate slotDate,
+            LocalTime startTime,
+            LocalTime endTime
+    );
+
+    @Query(
+            value = """
+            SELECT gb.*
+            FROM game_bookings gb
+            INNER JOIN time_slots ts
+                ON ts.time_slot_id = gb.time_slot_id
+            WHERE gb.booking_status = 'CONFIRMED'
+              AND (
+                    CAST(ts.slot_date AS DATETIME)
+                    + CAST(ts.end_time AS DATETIME)
+                  ) < :now
+            """,
+            nativeQuery = true
+    )
+    List<GameBooking> findConfirmedBookingsWithEndedSlot(@Param("now") LocalDateTime now);
 }

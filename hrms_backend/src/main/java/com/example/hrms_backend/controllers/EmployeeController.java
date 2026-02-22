@@ -4,6 +4,7 @@ import com.example.hrms_backend.dto.EmployeeDto;
 import com.example.hrms_backend.dto.EmployeeFetchDto;
 import com.example.hrms_backend.dto.EmployeeProfileUpdate;
 import com.example.hrms_backend.entities.Employee;
+import com.example.hrms_backend.entities.Game;
 import com.example.hrms_backend.services.EmployeeService;
 import com.example.hrms_backend.utils.SecurityUtils;
 import jakarta.validation.Valid;
@@ -12,9 +13,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -70,6 +75,14 @@ public class EmployeeController {
         return ResponseEntity.noContent().build();
     }
 
+    // Add Profile Picture
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("api/employee/profile-picture")
+    public  ResponseEntity<String> addProfilePicture(@RequestPart("file")MultipartFile file) throws IOException{
+        String profile = employeeService.uploadProfilePicture(file);
+        return ResponseEntity.ok(profile);
+    }
+
     // Get Current Employee
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/api/employee/me")
@@ -82,7 +95,7 @@ public class EmployeeController {
         fetchDto.setName(employee.getName());
         fetchDto.setEmail(employee.getEmail());
         fetchDto.setRole(role);
-
+        fetchDto.setProfilePictureFileUrl(employee.getProfilePictureFileUrl());
         return ResponseEntity.ok(fetchDto);
     }
 }

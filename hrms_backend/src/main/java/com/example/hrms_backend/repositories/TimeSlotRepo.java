@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.sql.Time;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
@@ -34,4 +35,14 @@ public interface TimeSlotRepo extends JpaRepository<TimeSlot, UUID> {
     List<TimeSlot> findUpcomingSlots(@Param("date") LocalDate date,
                                      @Param("startTime") LocalTime startTime,
                                      @Param("endTime") LocalTime endTime);
+
+    // Find slots start
+    @Query(value = """
+        SELECT *
+        FROM time_slots ts
+        WHERE CAST(ts.slot_date AS DATETIME)
+            + CAST(ts.start_time AS DATETIME)
+            <= :oneHourLater
+    """, nativeQuery = true)
+    List<TimeSlot> findSlotsStartingWithin(LocalDateTime oneHourLater);
 }

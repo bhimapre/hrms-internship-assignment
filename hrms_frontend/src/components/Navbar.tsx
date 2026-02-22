@@ -1,10 +1,15 @@
 import React, { useState } from 'react'
 import logo from "../assets/ROIMA_LOGO.jpeg"
-import { User, ChevronDown, LogOut } from "lucide-react"
+import { User, ChevronDown, LogOut, Gamepad2 } from "lucide-react"
+import { useNavigate } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
+import { useAuth } from '../auth/useAuth';
 
 const Navbar = () => {
 
     const [ProfileDropdown, setProfileDropdown] = useState<boolean>(false);
+    const navigate = useNavigate();
+    const { logout } = useAuth();
 
     return (
         <nav className="bg-neutral-900 border-b border-neutral-800 px-4 py-3">
@@ -23,6 +28,8 @@ const Navbar = () => {
                 {/* Right Section */}
                 <div className="flex items-center gap-4">
 
+                    <NotificationBell />
+
                     {/* Profile Section */}
                     <div className="relative">
                         <button
@@ -39,13 +46,21 @@ const Navbar = () => {
                             <div className="absolute right-0 mt-2 w-56 bg-neutral-900 border border-neutral-800 rounded-lg shadow-lg z-50">
                                 <div className="py-2">
                                     <a
+                                        onClick={() => navigate("/my-profile")}
                                         className="flex items-center gap-3 px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white transition">
                                         <User className="w-4 h-4" />
                                         My Profile
                                     </a>
+                                    <a
+                                        onClick={() => navigate("/upcoming-booking")}
+                                        className="flex items-center gap-3 px-4 py-2 text-neutral-300 hover:bg-neutral-800 hover:text-white transition">
+                                        <Gamepad2 className="w-4 h-4" />
+                                        UpComing Booking
+                                    </a>
                                     {/* Logout */}
                                     <div className="border-t border-neutral-800 mt-2 pt-2">
                                         <button
+                                            onClick={() => { logout(); navigate("/login"); }}
                                             className="flex items-center gap-3 px-4 py-2 text-red-400 hover:bg-neutral-800 hover:text-red-300 transition w-full text-left">
                                             <LogOut className="w-4 h-4" />
                                             Logout

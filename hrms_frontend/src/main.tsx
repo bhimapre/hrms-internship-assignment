@@ -45,6 +45,9 @@ import OrgChart from './pages/org chart/OrgChart.tsx';
 import ShowGameBookingTimeSlot from './pages/games/ShowGameBookingTimeSlot.tsx';
 import TimeSlotCreation from './pages/time slot/TimeSlotCreation.tsx';
 import GameTimeSlot from './pages/game booking/GameTimeSlot.tsx';
+import GameBooking from './pages/game booking/GameBooking.tsx';
+import MyProfilePage from './pages/employees/MyProfilePage.tsx';
+import UpcomingGameBookings from './pages/game booking/UpcomingGameBookings.tsx';
 
 const router = createBrowserRouter([
   {
@@ -210,6 +213,18 @@ const router = createBrowserRouter([
   {
     path: "/org-chart",
     element: <OrgChart />
+  },
+  {
+    path: "/game-booking/game/:gameId/time-slot/:timeSlotId",
+    element: <GameBooking />
+  },
+  {
+    path: "/my-profile",
+    element: <MyProfilePage />
+  },
+  {
+    path: "/upcoming-booking",
+    element: <UpcomingGameBookings />
   }
 ]);
 

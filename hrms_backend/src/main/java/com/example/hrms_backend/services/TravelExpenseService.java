@@ -308,8 +308,13 @@ public class TravelExpenseService {
                                                Pageable pageable)
     {
         Page<TravelExpense> expense = travelExpenseRepo.searchHrExpense(travelId, employeeName, travelTitle, expenseStatus, fromDate, toDate, pageable);
-        return expense.map(e ->
-                modelMapper.map(e, TravelExpenseDto.class));
+        return expense.map(e ->{
+                TravelExpenseDto dto = modelMapper.map(e, TravelExpenseDto.class);
+
+                Employee employee = employeeRepo.findById(e.getEmployee().getEmployeeId()).orElseThrow(() -> new ResourceNotFoundException("employee not found"));
+                dto.setExpenseName(employee.getName());
+                return dto;
+                });
     }
 
     // Get travel expense based on travel ID

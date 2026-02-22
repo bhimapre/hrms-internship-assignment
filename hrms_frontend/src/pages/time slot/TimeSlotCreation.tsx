@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { CreateTimeSlot } from '../../types/TimeSlot'
 import Loading from '../../components/Loading';
@@ -6,6 +6,7 @@ import { useCreateTimeSlot } from '../../hooks/time slot/useCreateTimeSlot';
 import { useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Navbar from '../../components/Navbar';
+import Sidebar from '../../components/Sidebar';
 
 const TimeSlotCreation = () => {
 
@@ -15,13 +16,15 @@ const TimeSlotCreation = () => {
 
     const { mutate: createGame, isPending } = useCreateTimeSlot();
 
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
     const onSubmit = (data: CreateTimeSlot) => {
         if (!gameId) {
             toast.error("Game Id is not found for Creation of time slot");
             return;
         }
 
-        createGame({gameId, data});
+        createGame({ gameId, data });
     }
 
     if (isPending) {
@@ -36,7 +39,7 @@ const TimeSlotCreation = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

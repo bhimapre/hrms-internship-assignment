@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom';
 import { useUpdateGameConfig } from '../../hooks/game config/useUpdateGameConfig';
 import { useFetchGameConfigById } from '../../hooks/game config/useFetchGameConfigById';
@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import Loading from '../../components/Loading';
 import Navbar from '../../components/Navbar';
 import { useFetchAllGames } from '../../hooks/game/useFetchAllGames';
+import Sidebar from '../../components/Sidebar';
 
 const UpdateGameConfig = () => {
 
@@ -16,7 +17,7 @@ const UpdateGameConfig = () => {
 
     const { data: configData, isLoading } = useFetchGameConfigById(configId);
 
-    const{ data: games} = useFetchAllGames();
+    const { data: games } = useFetchAllGames();
 
     const { register, handleSubmit, formState: { errors }, reset } = useForm<FetchGameConfig>();
 
@@ -27,6 +28,8 @@ const UpdateGameConfig = () => {
 
         updateGame({ configId, data });
     }
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     useEffect(() => {
         if (configData) {
@@ -46,8 +49,8 @@ const UpdateGameConfig = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
-
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+                
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">
                     <div className="text-center mt-8 mb-8">

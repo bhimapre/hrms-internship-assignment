@@ -1,10 +1,12 @@
 package com.example.hrms_backend.repositories;
 
+import com.example.hrms_backend.dto.PriorityQueueDto;
 import com.example.hrms_backend.dto.PriorityResultDto;
 import com.example.hrms_backend.entities.Game;
 import com.example.hrms_backend.entities.GameWaitingQueue;
 import com.example.hrms_backend.entities.enums.QueueStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
@@ -19,19 +21,31 @@ public interface GameWaitingQueueRepo extends JpaRepository<GameWaitingQueue, UU
     List<GameWaitingQueue> findByGame_GameIdAndTimeSlot_TimeSlotIdAndStatus(UUID gameGameId, UUID timeSlotTimeSlotId, QueueStatus status);
 
     @Procedure(procedureName = "sp_calculate_priority")
-    List<PriorityResultDto> calculatePriority(@Param("GameId") UUID gameId,
-                                              @Param("TimeSlotId") UUID timeSlotId,
-                                              @Param("MaxPlayer") Integer maxPlayer);
+    List<PriorityQueueDto> calculatePriority(@Param("GameId") UUID gameId,
+                                             @Param("TimeSlotId") UUID timeSlotId);
 
 
-    @Transactional
+    @Modifying
     @Query("""
-    update GameWaitingQueue w
-    set w.status = :status,
-    w.updatedAt = current timestamp 
-    where w.queueId = :ququeId
-""")
+        UPDATE GameWaitingQueue q
+        SET q.status = :status
+        WHERE q.queueId IN :queueIds
+    """)
+    void updateStatus(
+            @Param("queueIds") List<UUID> queueIds,
+            @Param("status") QueueStatus status
+    );
 
-    void updateStatus(@Param("queueId") UUID queueId,
-                      @Param("status") QueueStatus status);
+    @Modifying
+    @Query("""
+        UPDATE GameWaitingQueue q
+        SET q.status = 'CANCELLED'
+        WHERE q.timeSlot.timeSlotId = :timeSlotId
+          AND q.status = 'WAITING'
+          AND q.queueId NOT IN :allocatedIds
+    """)
+    void cancelRemaining(
+            @Param("timeSlotId") UUID timeSlotId,
+            @Param("allocatedIds") List<UUID> allocatedIds
+    );
 }

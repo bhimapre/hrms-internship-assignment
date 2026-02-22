@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import type { GameConfigBase } from '../../types/GameConfig'
 import Navbar from '../../components/Navbar';
 import { useCreateGameConfig } from '../../hooks/game config/useCreateGameConfig';
 import Loading from '../../components/Loading';
 import { useFetchAllGames } from '../../hooks/game/useFetchAllGames';
+import Sidebar from '../../components/Sidebar';
 
 const AddGameConfig = () => {
 
@@ -13,6 +14,8 @@ const AddGameConfig = () => {
     const { mutate: createConfig, isPending} = useCreateGameConfig();
 
     const{ data: games} = useFetchAllGames();
+
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     const onSubmit = (data: GameConfigBase) => {
         createConfig(data);
@@ -30,7 +33,7 @@ const AddGameConfig = () => {
             {/* Main Layout */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar */}
-                {/* <Sidebar /> */}
+                <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
                 {/* Page Content */}
                 <main className="flex-1 bg-neutral-950 text-white p-6 overflow-y-auto">

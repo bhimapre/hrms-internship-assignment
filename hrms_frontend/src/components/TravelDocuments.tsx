@@ -8,9 +8,7 @@ interface Props {
 
 export default function TravelDocuments({ documents = [] }: Props) {
 
-  const travelId = useParams();
-  console.log(travelId);
-  const role = localStorage.getItem("role");
+  const travelId = useParams<{travelId: string}>();  const role = localStorage.getItem("role");
   const navigate = useNavigate();
 
   return (
@@ -21,7 +19,7 @@ export default function TravelDocuments({ documents = [] }: Props) {
 
       {role === "HR" && (
         <>
-          <Button onClick={() => navigate(`/hr/travel-documents/${travelId}`)} variant="contained">Add Documents</Button>
+          <Button onClick={() => navigate(`/hr/travel-documents/${travelId.travelId}`)} variant="contained">Add Documents</Button>
         </>
       )}
 

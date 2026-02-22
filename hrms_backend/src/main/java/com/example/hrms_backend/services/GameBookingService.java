@@ -34,13 +34,15 @@ public class GameBookingService {
     private final GameRepo gameRepo;
     private final GameTimeSlotConfigRepo gameTimeSlotConfigRepo;
     private final NotificationService notificationService;
+    private final GamePlayStateRepo playStateRepo;
 
     @Transactional
     public GameBookingDto createGameBooking(CreateGameBookingDto createGameBookingDto){
 
         GameBooking booking = new GameBooking();
 
-        Employee employee = employeeRepo.findById(createGameBookingDto.getBookerId()).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        UUID userId = SecurityUtils.getCurrentUserId();
+        Employee employee = employeeRepo.findByUser_UserId(userId).orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
         TimeSlot timeSlot = timeSlotRepo.findById(createGameBookingDto.getTimeSlotId()).orElseThrow(() -> new ResourceNotFoundException("Time slot not found"));
         Game game = timeSlot.getGame();
         GameTimeSlotConfig timeSlotConfig = gameTimeSlotConfigRepo.findByGame_GameId(game.getGameId()).orElseThrow(() -> new ResourceNotFoundException("Game not found"));
@@ -68,7 +70,7 @@ public class GameBookingService {
             throw new BadRequestException("You cannot book more than its maximum player capacity");
         }
 
-        if(members.contains(createGameBookingDto.getBookerId())){
+        if(members.contains(employee.getEmployeeId())){
             throw new BadRequestException("Booker must not include in member list");
         }
 
@@ -95,19 +97,19 @@ public class GameBookingService {
         }
 
         // Check booker is already booked any time slot during this time slot
-        boolean isBookerHaveAlreadyTimeSlotInAnotherGame = gameBookingRepo.existsByBooker_EmployeeIdAndTimeSlot_SlotDateAndTimeSlot_StartTimeLessThanAndTimeSlot_EndTimeGreaterThan(employee.getEmployeeId(), timeSlot.getSlotDate(), endTime, startTime);
+        boolean isBookerHaveAlreadyTimeSlotInAnotherGame = gameBookingRepo.existsBookerOverlappingBooking(employee.getEmployeeId(), timeSlot.getSlotDate(), startTime, endTime);
         if(isBookerHaveAlreadyTimeSlotInAnotherGame){
             throw new BadRequestException("You already have booked this slot for another game");
         }
 
         // Check any booking member is not played particular game today
-        boolean isBookingPlayersPlayedGameToday = gameBookingMemberRepo.existsByEmployee_EmployeeIdInAndTimeSlot_SlotDateAndTimeSlot_StartTimeLessThanAndTimeSlot_EndTimeGreaterThan(members, timeSlot.getSlotDate(), endTime, startTime);
+        boolean isBookingPlayersPlayedGameToday = gameBookingMemberRepo.existsMemberPlayedGameToday(members, game.getGameId() ,timeSlot.getSlotDate());
         if(isBookingPlayersPlayedGameToday){
             throw new BadRequestException("Some one already played this game today");
         }
 
         // Check booking members are already booked any time slot during this time slot
-        boolean isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame = gameBookingMemberRepo.existsByTimeSlot_StartTimeAndTimeSlot_EndTimeAndTimeSlot_SlotDateAndEmployee_EmployeeIdIn(startTime, endTime, timeSlot.getSlotDate(), members);
+        boolean isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame = gameBookingMemberRepo.existsMemberOverlappingBooking(members, timeSlot.getSlotDate(), startTime, endTime);
         if(isBookingPlayerHaveAlreadyBookedTimeSlotInAnotherGame){
             throw new BadRequestException("Some one already played this game today");
         }
@@ -135,12 +137,12 @@ public class GameBookingService {
             bookingMember.setGameBooking(booking);
             bookingMember.setEmployee(emp);
             bookingMember.setTimeSlot(timeSlot);
-            bookingMember.setCreatedBy(createGameBookingDto.getBookerId());
+            bookingMember.setCreatedBy(employee.getEmployeeId());
             bookingMember.setCreatedAt(LocalDateTime.now());
             gameBookingMemberRepo.save(bookingMember);
 
             notificationService.sendNotification(emp.getEmployeeId(), "Game Booking Alert",
-                    booking.getGame().getGameName() + " booking successful on " + timeSlot.getSlotDate() + " form " + timeSlot.getStartTime() + " to " + timeSlot.getEndTime(),
+                    booking.getGame().getGameName() + " booking successful on " + timeSlot.getSlotDate() + " from " + timeSlot.getStartTime() + " to " + timeSlot.getEndTime(),
                     NotificationType.GAME_BOOKING);
         }
         return modelMapper.map(booking, GameBookingDto.class);
@@ -159,7 +161,7 @@ public class GameBookingService {
 
         LocalDateTime startDateTime = LocalDateTime.of(gameBooking.getTimeSlot().getSlotDate(), gameBooking.getTimeSlot().getStartTime());
 
-        if(!LocalDateTime.now().isAfter(startDateTime.minusMinutes(30))){
+        if(LocalDateTime.now().isAfter(startDateTime.minusMinutes(30))){
             throw new BadRequestException("You only cancel booking before 30 minutes of starting time");
         }
 
@@ -216,14 +218,28 @@ public class GameBookingService {
             bookingDetailsDto.setSlotDate(slot.getSlotDate());
             bookingDetailsDto.setStartTime(slot.getStartTime());
             bookingDetailsDto.setEndTime(slot.getEndTime());
+            bookingDetailsDto.setBookingStatus(booking.getBookingStatus());
+
+            List<BookingParticipantsDto> participants = new ArrayList<>();
+            participants.add( new BookingParticipantsDto(booking.getBooker().getEmployeeId(), booking.getBooker().getName(), "BOOKER"));
+
+            List<BookingMember> members = gameBookingMemberRepo.findByGameBooking_GameBookingId(booking.getGameBookingId());
+            for (BookingMember member: members){
+                participants.add(new BookingParticipantsDto(
+                        member.getEmployee().getEmployeeId(),
+                        member.getEmployee().getName(),
+                        "MEMBER"
+                ));
+            }
+            bookingDetailsDto.setParticipants(participants);
             response.add(bookingDetailsDto);
         }
 
         // Get Booking members
+
         List<BookingMember> memberBookings = gameBookingMemberRepo.findByEmployee_EmployeeIdAndTimeSlot_SlotDateGreaterThanEqual(employeeId, today);
 
         for (BookingMember member : memberBookings) {
-
             GameBooking booking = member.getGameBooking();
             TimeSlot slot = member.getTimeSlot();
 
@@ -244,6 +260,19 @@ public class GameBookingService {
             bookingDetailsDto.setSlotDate(slot.getSlotDate());
             bookingDetailsDto.setStartTime(slot.getStartTime());
             bookingDetailsDto.setEndTime(slot.getEndTime());
+            bookingDetailsDto.setBookingStatus(booking.getBookingStatus());
+            List<BookingParticipantsDto> participants = new ArrayList<>();
+            participants.add( new BookingParticipantsDto(booking.getBooker().getEmployeeId(), booking.getBooker().getName(), "BOOKER"));
+
+            List<BookingMember> members = gameBookingMemberRepo.findByGameBooking_GameBookingId(booking.getGameBookingId());
+            for (BookingMember mem: members){
+                participants.add(new BookingParticipantsDto(
+                        mem.getEmployee().getEmployeeId(),
+                        mem.getEmployee().getName(),
+                        "MEMBER"
+                ));
+            }
+            bookingDetailsDto.setParticipants(participants);
             response.add(bookingDetailsDto);
         }
 
@@ -289,5 +318,71 @@ public class GameBookingService {
         }
         bookingDetailsDto.setParticipants(participants);
         return bookingDetailsDto;
+    }
+
+    // Update the Booking Status and game play state for employee
+    private void updatePlayerGameState(
+            Employee employee,
+            Game game,
+            LocalDateTime playedAt
+    ) {
+        // If not exist then create it
+        GamePlayStats stats =
+                playStateRepo
+                        .findByEmployeeAndGame(employee, game)
+                        .orElseGet(() -> {
+                            GamePlayStats newStats = new GamePlayStats();
+                            newStats.setEmployee(employee);
+                            newStats.setGame(game);
+                            newStats.setCompletedSlots(0);
+                            return newStats;
+                        });
+
+        stats.setCompletedSlots(stats.getCompletedSlots() + 1);
+        stats.setLastPlayedAt(playedAt);
+
+        playStateRepo.save(stats);
+    }
+
+    // Update Game play stats
+    private void updateGamePlayStats(GameBooking booking) {
+
+        Game game = booking.getGame();
+        LocalDateTime playedAt = LocalDateTime.of(
+                booking.getTimeSlot().getSlotDate(),
+                booking.getTimeSlot().getEndTime()
+        );
+
+        //  Booker
+        updatePlayerGameState(booking.getBooker(), game, playedAt);
+
+        //  Booking members
+        for (BookingMember member : booking.getBookingMembers()) {
+            updatePlayerGameState(member.getEmployee(), game, playedAt);
+        }
+    }
+
+    // Update booking status
+    @Transactional
+    public void processCompletedBookings() {
+
+        LocalDateTime now = LocalDateTime.now();
+
+        List<GameBooking> completedBookings =
+                gameBookingRepo.findConfirmedBookingsWithEndedSlot(now);
+
+        if (completedBookings.isEmpty()) {
+            return;
+        }
+
+        for (GameBooking booking : completedBookings) {
+
+            if(booking.getBookingStatus() != BookingStatus.CONFIRMED){
+                continue;
+            }
+            booking.setBookingStatus(BookingStatus.COMPLETED);
+            gameBookingRepo.save(booking);
+            updateGamePlayStats(booking);
+        }
     }
 }
